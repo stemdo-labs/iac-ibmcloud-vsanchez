@@ -1,0 +1,91 @@
+- name: Backup
+  hosts: bd
+  become: true
+  vars:
+    postgres_user: "postgres"
+    backup_file: "/var/backups/postgres/vsanchezbd-backup.sql.gz.enc"
+    local_backup_dir: "/backups"
+    ansible_user: "vsanchez"
+    azure_container_name: "bdbackups"
+  vars_files:
+    - secrets.yml
+  tasks:
+
+    - name: Actualizar la caché de paquetes
+      apt:
+        update_cache: yes
+      become: true
+
+    - name: Crear el directorio de backups si no existe
+      file:
+        path: "/var/backups/postgres"
+        state: directory
+        mode: '0777'
+    
+    - name: Cambiar los permisos del directorio de backups
+      file:
+        path: "/var/backups/postgres"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0777'
+
+    - name: Dump y cifrar la base de datos PostgreSQL
+      shell: |
+        pg_dump -U {{ postgres_user }} {{ db_name }} | gzip | openssl enc -aes-256-cbc -salt -out {{ backup_file }} -k "{{ encryption_key }}"
+      environment:
+        PGPASSWORD: "mypassword"
+      register: backup_result
+
+    - name: Verificar si el dump y cifrado fue exitoso
+      debug:
+        msg: "Backup creado correctamente en {{ backup_file }}"
+      when: backup_result.rc == 0
+
+    - name: Generar token
+      shell: |
+        az storage container generate-sas \
+        --account-name stavsanchezdvfinlab \
+        --name backups \
+        --permissions rw \
+        --expiry 2024-12-12T23:59:59Z \
+        --https-only \
+        --output tsv
+      register: token
+
+    - name: Subirlo al contenedor
+      shell: |
+       az storage blob upload \
+        --account-name stavsanchezdvfinlab \
+        --container-name {{ azure_container_name }} \
+        --file {{ backup_file }} \
+        --name vsanchezbd-backup.sql.gz.enc \
+        --overwrite \
+        --sas-token "{{ token.stdout }}"
+  
+
+    # - name: Crear el directorio local de backups si no existe
+    #   local_action:
+    #     module: file
+    #     path: "{{ local_backup_dir }}"
+    #     state: directory
+    #     mode: '0777'
+
+    # - name: Ajustar permisos del archivo de backup
+    #   file:
+    #     path: "{{ backup_file }}"
+    #     owner: "{{ ansible_user }}"
+    #     group: "{{ ansible_user }}"
+    #     mode: '0777'
+    #   become: true
+
+    # - name: Traer el backup al controlador local
+    #   fetch:
+    #     src: "{{ backup_file }}"
+    #     dest: "{{ local_backup_dir }}/"
+    #     flat: yes
+    #   become: true
+
+    # - name: Confirmar la transferencia del archivo al controlador local
+    #   debug:
+    #     msg: "Backup transferido correctamente al controlador local en {{ local_backup_dir }}/{{ backup_file | basename }}"
+

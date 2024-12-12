@@ -1,0 +1,20 @@
+backend:
+  replicas: 1
+  image: containerregistryvsanchez.azurecr.io/imagen-proyecto-backend:0.0.3-SNAPSHOT
+  containerPort: 8080
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "500m"
+    limits:
+      memory: "512Mi"
+      cpu: "1000m"
+  env:
+    SPRING_DB_HOST: "10.0.0.5"
+    SPRING_DB_PORT: "5432"
+    SPRING_DB_NAME: "orquestas"
+    SPRING_DB_USER: "vsanchez"
+    SPRING_DB_PASSWORD: "mypassword"
+  service:
+    port: 8080
+    type: ClusterIP

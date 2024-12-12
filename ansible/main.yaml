@@ -1,0 +1,79 @@
+- name: Configuración e instalación de PostgreSQL
+  hosts: all
+  become: true
+
+  vars:
+    postgres_user: vsanchez
+  vars_files:
+    - secrets.yml
+
+  tasks:
+    - name: Actualizar el repositorio de paquetes
+      apt:
+        update_cache: yes
+
+    - name: Instalar PosgreSQL y los paquetes necesarios
+      apt:
+        name:
+          - postgresql
+          - postgresql-contrib
+          - python3-psycopg2
+        state: present
+        update_cache: yes
+
+    - name: Asegurarse de que PostgreSQL está en ejecución
+      service:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: Crear una base de datos
+      become: true
+      become_user: postgres
+      postgresql_db:
+        name: "{{ db_name }}"
+        owner: "postgres"
+        encoding: "UTF8"
+        state: present
+
+    - name: Crear usuario PostgreSQL
+      become: true
+      become_user: postgres
+      postgresql_user:
+        name: "{{ postgres_user }}"
+        password: "{{ db_password }}"
+        role_attr_flags: SUPERUSER
+        state: present
+
+    - name: Cambiar el propietario de la base de datos
+      become: true
+      become_user: postgres
+      shell: |
+        psql -c "ALTER DATABASE {{ db_name }} OWNER TO {{ postgres_user }};"
+
+    - name: Configurar listen_addresses = '*' en postgresql.conf
+      become: yes
+      lineinfile:
+        path: "/etc/postgresql/14/main/postgresql.conf"
+        regexp: '^#?listen_addresses ='
+        line: "listen_addresses = '*'"
+        state: present
+
+    - name: Configurar acceso en pg_hba.conf para conexiones externas
+      become: yes
+      lineinfile:
+        path: "/etc/postgresql/14/main/pg_hba.conf"
+        regexp: '^host\s+all\s+all\s+0.0.0.0/0\s+md5'
+        line: "host    all             all             0.0.0.0/0               md5"
+        state: present
+
+    - name: Reiniciar el servicio PostgreSQL
+      service:
+        name: postgresql
+        state: restarted
+
+    # - name: Configurar la contraseña del usuario PostgreSQL
+    #   become: true
+    #   become_user: postgres
+    #   shell: |
+    #     psql -c "ALTER USER {{ postgres_user }} WITH PASSWORD '{{ postgres_password }}';"

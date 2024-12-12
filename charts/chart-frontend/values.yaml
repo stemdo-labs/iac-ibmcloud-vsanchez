@@ -1,0 +1,19 @@
+# Values.yaml
+frontend:
+  replicas: 2
+  image: containerregistryvsanchez.azurecr.io/imagen-proyecto-frontend
+  containerPort: 80
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "250m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  service:
+    port: 80
+    type: LoadBalancer
+
+
+
+

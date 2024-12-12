@@ -1,0 +1,94 @@
+name: backup
+
+on:
+  schedule:
+    - cron: "0 */5 * * *"  
+  workflow_dispatch:
+
+jobs:
+  callBackup:
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      
+      - name: Set up Microsoft repository
+        working-directory: ansible
+        run: |
+          curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
+          sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+          AZ_REPO=$(lsb_release -cs)
+          echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+
+      - name: Update package list and install Azure CLI
+        working-directory: ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y azure-cli
+        
+      - name: Instalar az copy
+        working-directory: ansible
+        run: |
+          wget https://aka.ms/downloadazcopy-v10-linux -O azcopy.tar.gz
+          tar -xvf azcopy.tar.gz
+          sudo mv ./azcopy_linux_amd64_*/azcopy /usr/local/bin/
+          azcopy --version
+
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+        env:
+          AZURE_CREDENTIALS: |
+            {
+              "clientId": "${{ secrets.ARM_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
+              "tenantId": "${{ secrets.ARM_TENANT_ID }}",
+              "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+            }
+
+      - name: Az copy login
+        working-directory: ansible
+        run: az login --service-principal -u ${{ secrets.ARM_CLIENT_ID }} --password ${{ secrets.ARM_CLIENT_SECRET }} --tenant ${{ secrets.ARM_TENANT_ID }}
+
+      #- name: Verificar si la base de datos existe
+      #  id: check_db
+      #  run: |
+      #       cd ansible
+      #-       ansible-playbook verificacion.yaml -e "postgres_password=${{ secrets.POSTGRE_PASSWORD }} postgres_user=${{ secrets.POSTGRE_USER }} database_name=orquestas"
+
+      #- - name: Cargar variables del archivo generado por Ansible
+      #-  run: |
+      #-    cat db_status.env >> $GITHUB_ENV 
+
+      # Bloque de recuperación
+      #- name: Recuperar la base de datos si no existe la base de datos
+       #- if: env.DB_EXISTS == 'false'
+       #- run: |
+       #-   echo "La base de datos 'orquestas' no existe. Recuperando el último backup..."
+       #-   az storage blob list --account-name stavsanchezdvfinlab --container-name backups --query "[].name" -o tsv | sort -r | head -n 1 > last_backup.txt
+       #-   LAST_BACKUP=$(cat last_backup.txt)
+       #-   echo "Último backup encontrado: $LAST_BACKUP"
+       #-   az storage blob download --account-name stavsanchezdvfinlab --container-name backups --name $LAST_BACKUP --file /tmp/$LAST_BACKUP
+       #-   gunzip /tmp/$LAST_BACKUP
+       #-   RESTORE_FILE=$(basename /tmp/$LAST_BACKUP .gz)
+       #-   PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} psql -h ${{ secrets.POSTGRES_HOST }} -U ${{ secrets.POSTGRES_USER }} -d postgres -c "CREATE DATABASE orquestas;"
+       #-   PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} psql -h ${{ secrets.POSTGRES_HOST }} -U ${{ secrets.POSTGRES_USER }} -d orquestas -f /tmp/$RESTORE_FILE
+       #- env:
+        #-  AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+
+      # Bloque de backup
+      - name: crear secreto.txt
+        working-directory: ansible
+        run: |
+          echo ${{ secrets.KEY_SECRET }} > secreto.txt
+
+      - name: Continuar con el flujo de backup si la base de datos existe
+        working-directory: ansible
+        #- if: env.DB_EXISTS == 'true'
+        run: |
+          echo "La base de datos 'orquestas' existe. Procediendo con el backup."
+          ansible-playbook backup.yaml -i inventory.ini --vault-password-file secreto.txt
+        env:
+         DATE: $(date +%Y-%m-%d)

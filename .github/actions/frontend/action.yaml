@@ -1,0 +1,22 @@
+name: "Extraer versión de package.json"
+description: "Extrae la versión del archivo package.json de un proyecto Node.js"
+author: "Valentino"
+inputs:
+  path:
+    description: "Ruta al archivo package.json"
+    required: false
+    default: "./package.json"
+outputs:
+  version:
+    description: "La versión extraída del archivo package.json"
+    value: ${{ steps.extraer-version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Extraer versión de package.json
+      id: extraer-version
+      shell: bash
+      run: |
+        VERSION=$(jq -r '.version' "${{ inputs.path }}")
+        echo "VERSION=$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
