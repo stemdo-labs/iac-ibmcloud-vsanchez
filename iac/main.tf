@@ -10,7 +10,7 @@ terraform {
 
 provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key # API Key de IBM Cloud
-  region           = "eu-de"          # Región inicial
+  region           = "eu-gb"          # Región inicial
 }
 
 resource "ibm_resource_group" "resourceGroup" {
