@@ -13,6 +13,6 @@ provider "ibm" {
   region           = "eu-gb"          # Región inicial
 }
 
-resource "ibm_resource_group" "resourceGroup" {
-  name     = "iac-ibmcloud-vsanchez"
+resource "ibm_is_vpc" "vpc" {
+  name           = "vpc-vsanchez"
 }
