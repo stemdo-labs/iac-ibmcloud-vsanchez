@@ -15,4 +15,5 @@ provider "ibm" {
 
 resource "ibm_is_vpc" "vpc" {
   name           = "vpc-vsanchez"
+  resource_group = var.rg-name
 }
