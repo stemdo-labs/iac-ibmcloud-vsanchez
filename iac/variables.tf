@@ -7,6 +7,6 @@ variable "ibmcloud_api_key" {
 variable "rg-name" {
   description = "Nombre del grupo de recursos"
   type        = string
-  default     = "Stemdo_Sandbox"
+
   
 }
