@@ -12,3 +12,7 @@ provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key # API Key de IBM Cloud
   region           = "eu-de"          # Región inicial
 }
+
+resource "ibm_resource_group" "resourceGroup" {
+  name     = "iac-ibmcloud-vsanchez"
+}
