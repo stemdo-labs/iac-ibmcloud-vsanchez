@@ -43,4 +43,26 @@ resource "ibm_is_subnet" "subnet_cluster" {
   resource_group  = var.rg-name
 }
 
+resource "ibm_is_virtual_network_interface" "vni_vsanchezbd" {
+    name                                    = "vni-vsanchez1"
+    allow_ip_spoofing               = false
+    enable_infrastructure_nat   = true
+    primary_ip {
+        auto_delete       = false
+    address             = "10.242.0.8"
+    }
+    subnet   = ibm_is_subnet.subnet_bd.id
+}
+
+resource "ibm_is_virtual_network_interface" "vni_vsanchezcluster" {
+    name                                    = "vni-vsanchez2"
+    allow_ip_spoofing               = false
+    enable_infrastructure_nat   = true
+    primary_ip {
+        auto_delete       = false
+    address             = "10.242.64.8"
+    }
+    subnet   = ibm_is_subnet.subnet_cluster.id
+}
+
 
