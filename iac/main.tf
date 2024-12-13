@@ -61,12 +61,13 @@ resource "ibm_is_instance" "instance_vsanchez" {
   }
 }
 
-# resource "ibm_is_floating_ip" "public_ip" {
-#   name            = "public-ip-vm-bd-vsanchez"
-#   zone            = "eu-gb-1"
-#   resource_group  = var.rg-name
+resource "ibm_is_floating_ip" "public_ip" {
+  name            = "public-ip-vm-bd-vsanchez"
+  zone            = "eu-gb-1"
+  resource_group  = var.rg-name
+  target          = ibm_is_instance.instance_vsanchez.primary_network_interface.0.id
 
-# }
+}
 
 
 # # acr
