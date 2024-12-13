@@ -59,6 +59,7 @@ resource "ibm_cr_namespace" "rg_namespace" {
 resource "ibm_is_security_group" "ssh_security_group" {
   name   = "ssh-security-group"
   vpc    = ibm_is_vpc.vpc_bd.id 
+  resource_group = var.rg-name
 }
 
 # Crear una regla para habilitar el puerto 22 (SSH)
