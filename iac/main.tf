@@ -69,12 +69,11 @@ resource "ibm_is_floating_ip" "public_ip" {
 }
 
 
-# # acr
-# resource "ibm_container_registry" "acr" {
-#   name     = "containerregistryvsanchez"
-#   location = "eu-gb"
-#   plan     = "lite" 
-# }
+ # acr
+resource "ibm_cr_namespace" "rg_namespace" {
+  name              = "container-registry-namespace-vsanchez"
+  resource_group_id = var.rg-name
+}
 
 
 # # Contenedor para los backups
