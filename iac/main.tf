@@ -71,7 +71,7 @@ resource "ibm_is_floating_ip" "public_ip" {
 
  # acr
 resource "ibm_cr_namespace" "rg_namespace" {
-  name              = "container-registry-namespace-vsanchez"
+  name              = "cr-vsanchez"
   resource_group_id = var.rg-name
 }
 
