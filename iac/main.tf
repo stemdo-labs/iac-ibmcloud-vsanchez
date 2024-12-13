@@ -42,12 +42,13 @@ resource "ibm_is_subnet" "subnet_cluster" {
   resource_group  = var.rg-name
 }
 
-resource "ibm_is_instance" "example" {
-  name                      = "example-instance"
+resource "ibm_is_instance" "instance_vsanchez" {
+  name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
   vpc =  ibm_is_vpc.vpc_bd.id
   zone =  "eu-gb-1"
+  resource_group = var.rg-name
 
   primary_network_interface {
     subnet = ibm_is_subnet.subnet_bd.id
