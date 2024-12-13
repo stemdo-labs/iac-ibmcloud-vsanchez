@@ -66,7 +66,6 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
   direction      = "inbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
-  protocol       = "tcp"
   group =  ibm_is_security_group.ssh_security_group.id
   udp {
   port_min       = 22
