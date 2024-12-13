@@ -25,7 +25,7 @@ resource "ibm_is_vpc" "vpc_cluster" {
   resource_group = var.rg-name
 }
 
-# Crear Subnet para "vpc-bd" en Londres
+# Crear Subnet para "vpc-bd" en Londre
 # resource "ibm_is_subnet" "subnet_bd" {
 #   name            = "subnet-bd-vsanchez"
 #   vpc             = ibm_is_vpc.vpc_bd.id
