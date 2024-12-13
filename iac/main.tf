@@ -45,7 +45,7 @@ resource "ibm_is_subnet" "subnet_cluster" {
 resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
-  profile                   = "bx2-2x8"
+  profile                   = "bx2-1x2"
   vpc =  ibm_is_vpc.vpc_bd.id
   zone =  "eu-gb-1"
   resource_group = var.rg-name
@@ -61,7 +61,12 @@ resource "ibm_is_instance" "instance_vsanchez" {
   }
 }
 
+# resource "ibm_is_floating_ip" "public_ip" {
+#   name            = "public-ip-vm-bd-vsanchez"
+#   zone            = "eu-gb-1"
+#   resource_group  = var.rg-name
 
+# }
 
 
 # # acr
