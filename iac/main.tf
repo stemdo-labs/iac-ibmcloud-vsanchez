@@ -42,26 +42,40 @@ resource "ibm_is_subnet" "subnet_cluster" {
   resource_group  = var.rg-name
 }
 
-resource "ibm_is_virtual_network_interface" "vni_vsanchezbd" {
-    name                                    = "vni-vsanchez1"
-    allow_ip_spoofing               = false
-    enable_infrastructure_nat   = true
-    primary_ip {
-        auto_delete       = false
-    address             = "10.242.0.8"
-    }
-    subnet   = ibm_is_subnet.subnet_bd.id
+
+resource "ibm_container_registry" "acr" {
+  name     = "containerregistryvsanchez"
+  location = "eu-gb"
+  plan     = "lite" 
 }
 
-resource "ibm_is_virtual_network_interface" "vni_vsanchezcluster" {
-    name                                    = "vni-vsanchez2"
-    allow_ip_spoofing               = false
-    enable_infrastructure_nat   = true
-    primary_ip {
-        auto_delete       = false
-    address             = "10.242.64.8"
-    }
-    subnet   = ibm_is_subnet.subnet_cluster.id
+# COntenedor para los backups
+resource "ibm_resource_instance" "backups-instance-vsanchez" {
+  name              = "backups-instance-vsanchez"
+  resource_group_id = var.rg-name
+  service           = "cloud-object-storage"
+  plan              = "standard"
+  location          = "eu-gb"
 }
 
+resource "ibm_cos_bucket" "backups" {
+  bucket_name = "backups"
+  storage_class = "standard" # Cambia el nivel de almacenamiento si es necesario
+  resource_instance_id =  ibm_resource_instance.backups-instance-vsanchez.id
+}
 
+data "ibm_iam_access_group" "public_access_group" {
+  access_group_name = "Public Access"  
+}
+
+resource "ibm_iam_access_group_policy" "public_access_group_policy" {
+  access_group_id = data.ibm_iam_access_group.public_access_group.id
+  roles           = ["Content Reader", "Content Writer"]
+
+  resources {
+    resource = ibm_cos_bucket.backups.bucket_name
+    resource_instance_id = ibm_cos_bucket.backups.id
+    resource_type = "bucket"
+    service = "cloud-object-storage"
+  }
+}
