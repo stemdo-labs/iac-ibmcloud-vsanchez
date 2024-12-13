@@ -42,25 +42,6 @@ resource "ibm_is_subnet" "subnet_cluster" {
   resource_group  = var.rg-name
 }
 
-resource "ibm_is_instance" "instance_vsanchez" {
-  name                      = "vm-bd-vsanchez"
-  image                     = var.id_imagen
-  profile                   = "bx2-2x8"
-  vpc =  ibm_is_vpc.vpc_bd.id
-  zone =  "eu-gb-1"
-  resource_group = var.rg-name
-
-  primary_network_interface {
-    subnet = ibm_is_subnet.subnet_bd.id
-    allow_ip_spoofing = true
-    primary_ip {
-    auto_delete       = false
-    address             = "10.242.0.8"
-    }
-    
-  }
-}
-
 resource "ibm_is_floating_ip" "public_ip" {
   name            = "public-ip-vm-bd-vsanchez"
   resource_group  = var.rg-name
@@ -75,15 +56,50 @@ resource "ibm_cr_namespace" "rg_namespace" {
   resource_group_id = var.rg-name
 }
 
+resource "ibm_is_security_group" "ssh_security_group" {
+  name   = "ssh-security-group"
+  vpc    = ibm_is_vpc.vpc_bd.id 
+}
 
-# # Contenedor para los backups
-# resource "ibm_resource_instance" "backups-instance-vsanchez" {
-#   name              = "backups-instance-vsanchez"
-#   resource_group_id = var.rg-name
-#   service           = "cloud-object-storage"
-#   plan              = "standard"
-#   location          = "eu-gb"
-# }
+# Crear una regla para habilitar el puerto 22 (SSH)
+resource "ibm_is_security_group_rule" "allow_ssh" {
+  direction      = "inbound"
+  remote         = "0.0.0.0/0" 
+  ip_version     = "ipv4"
+  protocol       = "tcp"
+  group =  ibm_is_security_group.ssh_security_group.id
+}
+
+resource "ibm_is_instance" "instance_vsanchez" {
+  name                      = "vm-bd-vsanchez"
+  image                     = var.id_imagen
+  profile                   = "bx2-2x8"
+  vpc =  ibm_is_vpc.vpc_bd.id
+  zone =  "eu-gb-1"
+  resource_group = var.rg-name
+
+  primary_network_interface {
+    subnet = ibm_is_subnet.subnet_bd.id
+    allow_ip_spoofing = true
+    security_groups  = [ibm_is_security_group.ssh_security_group.id]
+    primary_ip {
+    auto_delete       = false
+    address             = "10.242.0.8"
+    }
+    
+  }
+}
+
+
+
+ # Contenedor para los backups
+#  resource "ibm_resource_instance" "backups-instance-vsanchez" {
+#    name              = "backups-instance-vsanchez"
+#    resource_group_id = var.rg-name
+#    service           = "cloud-object-storage"
+#    plan              = "standard"
+#    location          = "eu-gb"
+#  }
 
 # resource "ibm_cos_bucket" "backups" {
 #   bucket_name = "backups"
