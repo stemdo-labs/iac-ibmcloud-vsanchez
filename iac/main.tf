@@ -51,6 +51,8 @@ resource "ibm_is_instance" "example" {
   name                      = "example-instance"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
+  vpc =  ibm_is_vpc.vpc_bd.id
+  zone =  "eu-gb-1"
 
   primary_network_interface {
     subnet = ibm_is_subnet.subnet_bd.id
