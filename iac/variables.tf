@@ -18,3 +18,8 @@ variable "ssh_key" {
   sensitive   = true
   
 }
+variable "id_imagen" {
+  description = "ID de la imagen"
+  type        = string
+  sensitive = true
+}
