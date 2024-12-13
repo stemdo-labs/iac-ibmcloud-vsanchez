@@ -7,6 +7,14 @@ variable "ibmcloud_api_key" {
 variable "rg-name" {
   description = "Nombre del grupo de recursos"
   type        = string
+  sensitive = true
 
+  
+}
+
+variable "ssh_key" {
+  description = "Clave SSH para la VM"
+  type        = string
+  sensitive   = true
   
 }

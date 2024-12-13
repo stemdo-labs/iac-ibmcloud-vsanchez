@@ -42,40 +42,51 @@ resource "ibm_is_subnet" "subnet_cluster" {
   resource_group  = var.rg-name
 }
 
-
-resource "ibm_container_registry" "acr" {
-  name     = "containerregistryvsanchez"
-  location = "eu-gb"
-  plan     = "lite" 
+resource "ibm_is_ssh_key" "example" {
+  name       = "example-ssh"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCKVmnMOlHKcZK8tpt3MP1lqOLAcqcJzhsvJcjscgVERRN7/9484SOBJ3HSKxxNG5JN8owAjy5f9yYwcUg+JaUVuytn5Pv3aeYROHGGg+5G346xaq3DAwX6Y5ykr2fvjObgncQBnuU5KHWCECO/4h8uWuwh/kfniXPVjFToc+gnkqA+3RKpAecZhFXwfalQ9mMuYGFxn+fwn8cYEApsJbsEmb0iJwPiZ5hjFC8wREuiTlhPHDgkBLOiycd20op2nXzDbHfCHInquEe/gYxEitALONxm0swBOwJZwlTDOB7C6y2dzlrtxr1L59m7pCkWI4EtTRLvleehBoj3u7jB4usR"
 }
 
-# COntenedor para los backups
-resource "ibm_resource_instance" "backups-instance-vsanchez" {
-  name              = "backups-instance-vsanchez"
-  resource_group_id = var.rg-name
-  service           = "cloud-object-storage"
-  plan              = "standard"
-  location          = "eu-gb"
-}
 
-resource "ibm_cos_bucket" "backups" {
-  bucket_name = "backups"
-  storage_class = "standard" # Cambia el nivel de almacenamiento si es necesario
-  resource_instance_id =  ibm_resource_instance.backups-instance-vsanchez.id
-}
 
-data "ibm_iam_access_group" "public_access_group" {
-  access_group_name = "Public Access"  
-}
 
-resource "ibm_iam_access_group_policy" "public_access_group_policy" {
-  access_group_id = data.ibm_iam_access_group.public_access_group.id
-  roles           = ["Content Reader", "Content Writer"]
 
-  resources {
-    resource = ibm_cos_bucket.backups.bucket_name
-    resource_instance_id = ibm_cos_bucket.backups.id
-    resource_type = "bucket"
-    service = "cloud-object-storage"
-  }
-}
+
+# # acr
+# resource "ibm_container_registry" "acr" {
+#   name     = "containerregistryvsanchez"
+#   location = "eu-gb"
+#   plan     = "lite" 
+# }
+
+
+# # Contenedor para los backups
+# resource "ibm_resource_instance" "backups-instance-vsanchez" {
+#   name              = "backups-instance-vsanchez"
+#   resource_group_id = var.rg-name
+#   service           = "cloud-object-storage"
+#   plan              = "standard"
+#   location          = "eu-gb"
+# }
+
+# resource "ibm_cos_bucket" "backups" {
+#   bucket_name = "backups"
+#   storage_class = "standard" # Cambia el nivel de almacenamiento si es necesario
+#   resource_instance_id =  ibm_resource_instance.backups-instance-vsanchez.id
+# }
+
+# data "ibm_iam_access_group" "public_access_group" {
+#   access_group_name = "Public Access"  
+# }
+
+# resource "ibm_iam_access_group_policy" "public_access_group_policy" {
+#   access_group_id = data.ibm_iam_access_group.public_access_group.id
+#   roles           = ["Content Reader", "Content Writer"]
+
+#   resources {
+#     resource = ibm_cos_bucket.backups.bucket_name
+#     resource_instance_id = ibm_cos_bucket.backups.id
+#     resource_type = "bucket"
+#     service = "cloud-object-storage"
+#   }
+# }
