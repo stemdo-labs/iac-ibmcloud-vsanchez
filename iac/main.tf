@@ -25,22 +25,22 @@ resource "ibm_is_vpc" "vpc_cluster" {
   resource_group = var.rg-name
 }
 
-# Crear Subnet para "vpc-bd" en Londre
-# resource "ibm_is_subnet" "subnet_bd" {
-#   name            = "subnet-bd-vsanchez"
-#   vpc             = ibm_is_vpc.vpc_bd.id
-#   zone            = "eu-gb-1" # Zona de Londres
-#   ipv4_cidr_block = "10.0.1.0/24" # Cambia por el rango CIDR que necesites
-#   resource_group  = var.rg-name
-# }
+# Crear Subnet para "vpc-bd" en Londres
+resource "ibm_is_subnet" "subnet_bd" {
+  name            = "subnet-bd-vsanchez"
+  vpc             = ibm_is_vpc.vpc_bd.id
+  zone            = "eu-gb-1" # Zona de Londres
+  ipv4_cidr_block = "10.242.1.0/18" # Cambia por el rango CIDR que necesites
+  resource_group  = var.rg-name
+}
 
-# # Crear Subnet para "vpc-cluster" en Londres
-# resource "ibm_is_subnet" "subnet_cluster" {
-#   name            = "subnet-cluster-vsanchez"
-#   vpc             = ibm_is_vpc.vpc_cluster.id
-#   zone            = "eu-gb-2" # Otra zona de Londres
-#   ipv4_cidr_block = "10.0.2.0/24" # Cambia por el rango CIDR que necesites
-#   resource_group  = var.rg-name
-# }
+# Crear Subnet para "vpc-cluster" en Londres
+resource "ibm_is_subnet" "subnet_cluster" {
+  name            = "subnet-cluster-vsanchez"
+  vpc             = ibm_is_vpc.vpc_cluster.id
+  zone            = "eu-gb-2" # Otra zona de Londres
+  ipv4_cidr_block = "10.242.2.0/18" # Cambia por el rango CIDR que necesites
+  resource_group  = var.rg-name
+}
 
 
