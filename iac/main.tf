@@ -45,7 +45,7 @@ resource "ibm_is_subnet" "subnet_cluster" {
 resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
-  profile                   = "bx2-2x4"
+  profile                   = "bx2-2x8"
   vpc =  ibm_is_vpc.vpc_bd.id
   zone =  "eu-gb-1"
   resource_group = var.rg-name
