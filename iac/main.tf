@@ -122,7 +122,7 @@ resource "ibm_resource_instance" "cos_instance" {
   name     = "cos-instance-vsanchez"
   service  = "cloud-object-storage"
   plan     = "lite"
-  location = "eu-gb"
+  location = "global"
 }
 resource "ibm_container_vpc_cluster" "cluster" {
   name              = "vsanchez-vpc_cluster"
