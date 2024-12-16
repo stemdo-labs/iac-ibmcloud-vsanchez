@@ -119,6 +119,7 @@ resource "ibm_is_subnet" "subnet_cluster" {
 }
 
 resource "ibm_resource_instance" "cos_instance" {
+  resource_group_id = var.rg-name
   name     = "cos-instance-vsanchez"
   service  = "cloud-object-storage"
   plan     = "lite"
