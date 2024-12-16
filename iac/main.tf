@@ -40,14 +40,7 @@ resource "ibm_is_subnet" "subnet_bd" {
   public_gateway = ibm_is_public_gateway.public_gateway.id
 }
 
-# Crear Subnet para "vpc-cluster" en Londres
-resource "ibm_is_subnet" "subnet_cluster" {
-  name            = "subnet-cluster-vsanchez"
-  vpc             = ibm_is_vpc.vpc_cluster.id
-  zone            = "eu-gb-2" # Otra zona de Londres
-  ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
-  resource_group  = var.rg-name
-}
+
 
 resource "ibm_is_floating_ip" "public_ip" {
   name            = "public-ip-vm-bd-vsanchez"
@@ -116,6 +109,22 @@ resource "ibm_is_instance" "instance_vsanchez" {
   }
 }
 
+# Crear Subnet para "vpc-cluster" en Londres
+resource "ibm_is_subnet" "subnet_cluster" {
+  name            = "subnet-cluster-vsanchez"
+  vpc             = ibm_is_vpc.vpc_cluster.id
+  zone            = "eu-gb-2" # Otra zona de Londres
+  ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
+  resource_group  = var.rg-name
+}
+resource "ibm_container_cluster" "cluster-vsanchez" {
+  name = "cluster-vsanchez"
+  datacenter = "lon02"
+  resource_group_id = var.rg-name
+  machine_type = "u2c.2x4"
+  hardware = "shared"
+  private_vlan_id = ibm_is_subnet.subnet_cluster.id
+}
 
 
 
