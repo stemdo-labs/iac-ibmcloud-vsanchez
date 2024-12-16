@@ -117,14 +117,18 @@ resource "ibm_is_subnet" "subnet_cluster" {
   ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
   resource_group  = var.rg-name
 }
-# resource "ibm_container_cluster" "cluster-vsanchez" {
-#   name = "cluster-vsanchez"
-#   datacenter = "lon02"
-#   resource_group_id = var.rg-name
-#   machine_type = "u2c.2x4"
-#   hardware = "shared"
-#   private_vlan_id = ibm_is_subnet.subnet_cluster.id
-# }
+resource "ibm_container_vpc_cluster" "cluster" {
+  name              = "my_vpc_cluster"
+  vpc_id            = "r006-abb7c7ea-aadf-41bd-94c5-b8521736fadf"
+  kube_version      = "1.17.5"
+  flavor            = "bx2.2x4"
+  worker_count      = "1"
+  resource_group_id = var.rg-name
+  zones {
+      subnet_id = ibm_is_subnet.subnet_cluster.id
+      name      = "cluster-zone-1"
+    }
+}
 
 
 
