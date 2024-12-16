@@ -75,6 +75,12 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
   
 }
 
+resource "ibm_is_ssh_key" "ssh_key" {
+  name       = "ssh-key-vsanchez"
+  public_key = var.public_ssh_key
+  type       = "rsa"
+}
+
 resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
@@ -82,6 +88,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   vpc =  ibm_is_vpc.vpc_bd.id
   zone =  "eu-gb-1"
   resource_group = var.rg-name
+  keys = [ ibm_is_ssh_key.ssh_key.id ]
 
   primary_network_interface {
     subnet = ibm_is_subnet.subnet_bd.id
@@ -95,11 +102,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   }
 }
 
-resource "ibm_is_ssh_key" "ssh_key" {
-  name       = "ssh-key-vsanchez"
-  public_key = var.public_ssh_key
-  type       = "rsa"
-}
+
 
 
 
