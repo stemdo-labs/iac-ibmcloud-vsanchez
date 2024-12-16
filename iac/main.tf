@@ -121,12 +121,12 @@ resource "ibm_container_vpc_cluster" "cluster" {
   name              = "my_vpc_cluster"
   vpc_id            = ibm_is_vpc.vpc_cluster.id
   kube_version      = "1.17.5"
-  flavor            = "bx2.2x4"
+  flavor            = "bx2.4x16"
   worker_count      = "1"
   resource_group_id = var.rg-name
   zones {
       subnet_id = ibm_is_subnet.subnet_cluster.id
-      name      = "cluster-zone-1"
+      name      = "eu-gb-2"
     }
 }
 
