@@ -119,7 +119,7 @@ resource "ibm_is_subnet" "subnet_cluster" {
 }
 resource "ibm_container_vpc_cluster" "cluster" {
   name              = "my_vpc_cluster"
-  vpc_id            = "r006-abb7c7ea-aadf-41bd-94c5-b8521736fadf"
+  vpc_id            = ibm_is_vpc.vpc_cluster.id
   kube_version      = "1.17.5"
   flavor            = "bx2.2x4"
   worker_count      = "1"
