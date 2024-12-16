@@ -117,13 +117,21 @@ resource "ibm_is_subnet" "subnet_cluster" {
   ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
   resource_group  = var.rg-name
 }
+
+resource "ibm_resource_instance" "cos_instance" {
+  name     = "cos-instance-vsanchez"
+  service  = "cloud-object-storage"
+  plan     = "lite"
+  location = "eu-gb"
+}
 resource "ibm_container_vpc_cluster" "cluster" {
   name              = "my_vpc_cluster"
   vpc_id            = ibm_is_vpc.vpc_cluster.id
-  kube_version      = "1.17.5"
+  kube_version      = "4.3_openshift"
   flavor            = "bx2.4x16"
-  worker_count      = "1"
+  worker_count      = "2"
   resource_group_id = var.rg-name
+  cos_instance_crn  = ibm_resource_instance.cos_instance.id
   zones {
       subnet_id = ibm_is_subnet.subnet_cluster.id
       name      = "eu-gb-2"
