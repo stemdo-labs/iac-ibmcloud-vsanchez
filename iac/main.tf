@@ -24,6 +24,12 @@ resource "ibm_is_vpc" "vpc_cluster" {
   resource_group = var.rg-name
 }
 
+resource "ibm_is_public_gateway" "public_gateway" {
+  name   = "public-gateway-bd"
+  vpc    = ibm_is_vpc.vpc_bd.id
+  zone   = "eu-gb-1"
+  resource_group = var.rg-name
+}
 # Crear Subnet para "vpc-bd" en Londres
 resource "ibm_is_subnet" "subnet_bd" {
   name            = "subnet-bd-vsanchez"
@@ -31,6 +37,7 @@ resource "ibm_is_subnet" "subnet_bd" {
   zone            = "eu-gb-1" # Zona de Londres
   ipv4_cidr_block = "10.242.0.0/24" # Cambia por el rango CIDR que necesites
   resource_group  = var.rg-name
+  public_gateway = ibm_is_public_gateway.public_gateway.id
 }
 
 # Crear Subnet para "vpc-cluster" en Londres
