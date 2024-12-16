@@ -23,3 +23,8 @@ variable "id_imagen" {
   type        = string
   sensitive = true
 }
+
+variable "public_ssh_key" {
+  description = "Clave SSH para la VM"
+  type        = string
+}
