@@ -81,7 +81,7 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
   }
   
 }
-resource "ibm_is_security_group_rule" "allow_ssh" {
+resource "ibm_is_security_group_rule" "allow_outbound" {
   direction      = "outbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
