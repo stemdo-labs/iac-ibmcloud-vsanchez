@@ -22,4 +22,4 @@ jobs:
       - name: ejecutar playbook
         working-directory: ansible  
         run: |
-          ansible-playbook main.yaml -i inventory.ini --vault-password-file secreto.txt
+          ansible-playbook main.yaml -i inventory.ini --vault-password-file secreto.txt --become --extra-vars "ansible_become_password=${{ secrets.USER_PASSWORD }}"
