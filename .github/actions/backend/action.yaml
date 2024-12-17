@@ -1,0 +1,28 @@
+name: "Extraer versión de Maven"
+description: "Extrae la versión del archivo pom.xml de un proyecto Maven"
+author: "Valentino"
+inputs:
+  path:
+    description: "Ruta al archivo pom.xml"
+    required: false
+    default: "./pom.xml"
+outputs:
+  version:
+    description: "La versión extraída del archivo pom.xml"
+    value: ${{ steps.extraer-version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Extraer versión de Maven
+      id: extraer-version
+      shell: bash
+      run: |
+        VERSION=$(grep -o '<version>[^<]*</version>' "${{ inputs.path }}" | sed -e 's/<\/\?version>//g' | sed -n '2p')
+
+        if [ -z "$VERSION" ]; then
+          echo "Error: No se pudo extraer la versión del archivo pom.xml"
+          exit 1
+        fi
+        echo "VERSION=$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+

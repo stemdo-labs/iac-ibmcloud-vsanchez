@@ -1,0 +1,25 @@
+name: postgre
+
+on:
+  workflow_dispatch:
+
+jobs:
+  install-postgre:    
+    runs-on: self-hosted
+    steps:
+      - name: clonar repositorio
+        uses: actions/checkout@v3
+      
+      - name: Agregar contraseña del secret
+        working-directory: ansible  
+        run: |
+          echo ${{ secrets.KEY_SECRET }} > secreto.txt
+
+      - name: ls
+        working-directory: ansible  
+        run: ls
+
+      - name: ejecutar playbook
+        working-directory: ansible  
+        run: |
+          ansible-playbook main.yaml -i inventory.ini --vault-password-file secreto.txt

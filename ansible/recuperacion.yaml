@@ -1,0 +1,53 @@
+- name: Disaster recovery
+  hosts: database_server
+  become: true
+  vars:
+    postgres_user: "postgres"
+    backup_file: "/var/backups/postgres/backup_recovery.sql"
+    # local_backup_dir: "/var/backups/"
+    
+    azure_client_id: "{{ lookup('env', 'ARM_CLIENT_ID') }}"
+    azure_client_secret: "{{ lookup('env', 'ARM_CLIENT_SECRET') }}"
+    azure_subscription_id: "{{ lookup('env', 'ARM_SUBSCRIPTION_ID') }}"
+    azure_tenant_id: "{{ lookup('env', 'ARM_TENANT_ID') }}"
+    db_user: "vsanchez"
+ 
+    RESOURCE_GROUP_NAME: "rg-vsanchez-dvfinlab"
+    STORAGE_ACCOUNT_NAME: "stavsanchezdvfinlab"
+    CONTAINER_BACKUP_NAME: "backup"
+    last_blob: "{{ lookup('env', 'LAST_BLOB') }}"
+ 
+  tasks:
+  - name: Eliminar '.gz.enc' usando slice
+    set_fact:
+      decripted_backup: "{{ last_blob[:-7] }}"
+ 
+  - name: Crear el directorio de backups si no existe
+    file:
+      path: "/var/backups/postgres"
+      state: directory
+      mode: '0777'
+ 
+  # - name: Copiar archivo encriptado desde la máquina de control a los hosts gestionados
+  #   ansible.builtin.copy:
+  #     src: "{{ local_backup_dir }}/{{ last_blob}}"
+  #     dest: "{{ backup_file }}"
+  #     mode: '777'
+  
+  - name: Desencriptar y guardar el dump en los hosts gestionados
+    ansible.builtin.shell: |
+      openssl enc -d -aes-256-cbc \
+      -in "{{ last_blob }}" \
+      -k "{{ encryption_key }}" | gunzip > "/var/backups/{{ decripted_backup }}"
+    args:
+      executable: /bin/bash
+ 
+ 
+  - name: Cargar base de datos desde archivo SQL
+    ansible.builtin.command:
+      cmd: >
+        psql -U {{ db_user }}
+        -d {{ db_name }}
+        -f "/var/backups/{{ decripted_backup }}"
+    environment:
+      PGPASSWORD: "{{ db_password }}"

@@ -1,0 +1,50 @@
+name: ansible
+
+on:
+  workflow_dispatch:
+
+jobs:
+  install-ansible:
+    runs-on: self-hosted
+
+    steps:
+      # Paso 1: Clonar el repositorio
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Paso 2: Actualizar y actualizar el sistema
+      - name: Update and Upgrade System
+        run: |
+          sudo apt-get update
+          sudo apt-get -y upgrade
+
+      # Paso 3: Instalar dependencias necesarias
+      - name: Install Required Dependencies
+        run: |
+          sudo apt-get install -y software-properties-common
+
+      # Paso 4: Agregar el repositorio de Ansible
+      - name: Add Ansible PPA
+        run: |
+          sudo add-apt-repository --yes --update ppa:ansible/ansible
+
+      # Paso 5: Instalar Ansible
+      - name: Install Ansible
+        run: |
+          sudo apt-get install -y ansible
+
+      # Paso 6: Verificar instalación de Ansible
+      - name: Verify Ansible Installation
+        run: ansible --version
+
+      # Paso 7: Instalar rol de Ansible desde Galaxy
+      - name: Install Ansible Galaxy Role
+        run: ansible-galaxy role install geerlingguy.postgresql
+
+      # Paso 8: Instalar colección de Ansible para Azure
+      - name: Install Azure Collection
+        run: ansible-galaxy collection install azure.azcollection
+
+      
+  
+ 
