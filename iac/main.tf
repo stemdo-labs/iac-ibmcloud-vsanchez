@@ -130,7 +130,7 @@ resource "ibm_container_vpc_cluster" "cluster" {
   depends_on = [ ibm_resource_instance.cos_instance ]
   name              = "vsanchez-vpc_cluster"
   vpc_id            = ibm_is_vpc.vpc_cluster.id
-  kube_version      = "4.3_openshift"
+  kube_version      = "4.16.23_openshift"
   flavor            = "bx2.4x16"
   worker_count      = "1"
   resource_group_id = var.rg-name
