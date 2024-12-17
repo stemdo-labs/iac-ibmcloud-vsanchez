@@ -126,6 +126,7 @@ resource "ibm_resource_instance" "cos_instance" {
   location = "global"
 }
 resource "ibm_container_vpc_cluster" "cluster" {
+  depends_on = [ ibm_resource_instance.cos_instance ]
   name              = "vsanchez-vpc_cluster"
   vpc_id            = ibm_is_vpc.vpc_cluster.id
   kube_version      = "4.3_openshift"
