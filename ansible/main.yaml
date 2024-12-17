@@ -53,7 +53,7 @@
     - name: Configurar listen_addresses = '*' en postgresql.conf
       become: yes
       lineinfile:
-        path: "/etc/postgresql/14/main/postgresql.conf"
+        path: "/etc/postgresql/16/main/postgresql.conf"
         regexp: '^#?listen_addresses ='
         line: "listen_addresses = '*'"
         state: present
