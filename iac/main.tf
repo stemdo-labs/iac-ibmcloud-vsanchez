@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "ibm" {
-  # ibmcloud_api_key = var.ibmcloud_api_key # API Key de IBM Cloud
+  ibmcloud_api_key = var.ibmcloud_api_key # API Key de IBM Cloud
   region           = "eu-gb"          # Región inicial
   
 }
@@ -132,13 +132,14 @@ resource "ibm_container_vpc_cluster" "cluster" {
   vpc_id            = ibm_is_vpc.vpc_cluster.id
   kube_version      = "4.16.23_openshift"
   flavor            = "bx2.4x16"
-  worker_count      = "1"
+  worker_count      = "2"
   resource_group_id = var.rg-name
   cos_instance_crn  = ibm_resource_instance.cos_instance.id
   zones {
       subnet_id = ibm_is_subnet.subnet_cluster.id
       name      = "eu-gb-2"
     }
+
 }
 
 
