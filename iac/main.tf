@@ -123,7 +123,7 @@ resource "ibm_resource_instance" "cos_instance" {
   resource_group_id = var.rg-name
   name     = "cos-instance-vsanchez"
   service  = "cloud-object-storage"
-  plan     = "lite"
+  plan     = "standard"
   location = "global"
 }
 resource "ibm_container_vpc_cluster" "cluster" {
