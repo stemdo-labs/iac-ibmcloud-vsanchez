@@ -18,6 +18,11 @@ jobs:
       - name: ls
         working-directory: ansible  
         run: ls
+      
+      - name:  cat main.yaml
+        working-directory: ansible  
+        run: |
+          cat main.yaml
 
       - name: ejecutar playbook
         working-directory: ansible  
