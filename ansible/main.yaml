@@ -61,7 +61,7 @@
     - name: Configurar acceso en pg_hba.conf para conexiones externas
       become: yes
       lineinfile:
-        path: "/etc/postgresql/14/main/pg_hba.conf"
+        path: "/etc/postgresql/16/main/pg_hba.conf"
         regexp: '^host\s+all\s+all\s+0.0.0.0/0\s+md5'
         line: "host    all             all             0.0.0.0/0               md5"
         state: present
