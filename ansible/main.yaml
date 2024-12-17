@@ -6,7 +6,6 @@
     postgres_user: vsanchez
   vars_files:
     - secrets.yml
-
   tasks:
     - name: Actualizar el repositorio de paquetes
       apt:
