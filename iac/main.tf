@@ -135,7 +135,7 @@ resource "ibm_is_security_group" "cluster_security_group" {
   resource_group = var.rg-name
 }
 
-resource "ibm_is_security_group_rule" "allow_outbound" {
+resource "ibm_is_security_group_rule" "allow_outbound-cluster" {
   direction      = "outbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
@@ -143,7 +143,7 @@ resource "ibm_is_security_group_rule" "allow_outbound" {
 }
 
 
-resource "ibm_is_public_gateway" "public_gateway" {
+resource "ibm_is_public_gateway" "public_gateway-cluster" {
   name   = "public-gateway-bd"
   vpc    = ibm_is_vpc.vpc_cluster.id
   zone   = "eu-gb-1"
