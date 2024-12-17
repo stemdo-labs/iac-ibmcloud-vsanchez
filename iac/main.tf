@@ -126,6 +126,29 @@ resource "ibm_resource_instance" "cos_instance" {
   plan     = "standard"
   location = "global"
 }
+
+
+
+resource "ibm_is_security_group" "cluster_security_group" {
+  name   = "cluster-security-group"
+  vpc    = ibm_is_vpc.vpc_cluster.id 
+  resource_group = var.rg-name
+}
+
+resource "ibm_is_security_group_rule" "allow_outbound" {
+  direction      = "outbound"
+  remote         = "0.0.0.0/0" 
+  ip_version     = "ipv4"
+  group =  ibm_is_security_group.cluster_security_group.id
+}
+
+
+resource "ibm_is_public_gateway" "public_gateway" {
+  name   = "public-gateway-bd"
+  vpc    = ibm_is_vpc.vpc_cluster.id
+  zone   = "eu-gb-1"
+  resource_group = var.rg-name
+}
 resource "ibm_container_vpc_cluster" "cluster" {
   depends_on = [ ibm_resource_instance.cos_instance ]
   name              = "vsanchez-vpc_cluster"
