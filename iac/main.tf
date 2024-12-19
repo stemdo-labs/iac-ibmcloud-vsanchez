@@ -147,7 +147,7 @@ resource "ibm_is_security_group_rule" "allow_outbound-cluster" {
 resource "ibm_is_public_gateway" "public_gateway-cluster" {
   name   = "public-gateway-bd"
   vpc    = ibm_is_vpc.vpc_cluster.id
-  zone   = "eu-gb-1"
+  zone   = "eu-gb-2"
   resource_group = var.rg-name
 }
 resource "ibm_container_vpc_cluster" "cluster" {
