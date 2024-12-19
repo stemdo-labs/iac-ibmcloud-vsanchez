@@ -117,6 +117,7 @@ resource "ibm_is_subnet" "subnet_cluster" {
   zone            = "eu-gb-2" # Otra zona de Londres
   ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
   resource_group  = var.rg-name
+  public_gateway = ibm_is_public_gateway.public_gateway-cluster.id
 }
 
 resource "ibm_resource_instance" "cos_instance" {
