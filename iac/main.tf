@@ -110,15 +110,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   }
 }
 
-# Crear Subnet para "vpc-cluster" en Londres
-resource "ibm_is_subnet" "subnet_cluster" {
-  name            = "subnet-cluster-vsanchez"
-  vpc             = ibm_is_vpc.vpc_cluster.id
-  zone            = "eu-gb-2" # Otra zona de Londres
-  ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
-  resource_group  = var.rg-name
-  public_gateway = ibm_is_public_gateway.public_gateway-cluster.id
-}
+
 
 resource "ibm_resource_instance" "cos_instance" {
   resource_group_id = var.rg-name
@@ -143,6 +135,15 @@ resource "ibm_is_security_group_rule" "allow_outbound-cluster" {
   group =  ibm_is_security_group.cluster_security_group.id
 }
 
+# Crear Subnet para "vpc-cluster" en Londres
+resource "ibm_is_subnet" "subnet_cluster" {
+  name            = "subnet-cluster-vsanchez"
+  vpc             = ibm_is_vpc.vpc_cluster.id
+  zone            = "eu-gb-2" # Otra zona de Londres
+  ipv4_cidr_block = "10.242.64.0/24" # Cambia por el rango CIDR que necesites
+  resource_group  = var.rg-name
+  public_gateway = ibm_is_public_gateway.public_gateway-cluster.id
+}
 
 resource "ibm_is_public_gateway" "public_gateway-cluster" {
   name   = "public-gateway-bd"
@@ -159,6 +160,7 @@ resource "ibm_container_vpc_cluster" "cluster" {
   worker_count      = "2"
   resource_group_id = var.rg-name
   cos_instance_crn  = ibm_resource_instance.cos_instance.id
+  
   zones {
       subnet_id = ibm_is_subnet.subnet_cluster.id
       name      = "eu-gb-2"
