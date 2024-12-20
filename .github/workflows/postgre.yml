@@ -5,7 +5,7 @@ on:
 
 jobs:
   install-postgre:    
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: clonar repositorio
         uses: actions/checkout@v3
