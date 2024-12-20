@@ -161,6 +161,7 @@ resource "ibm_container_vpc_cluster" "cluster" {
   resource_group_id = var.rg-name
   cos_instance_crn  = ibm_resource_instance.cos_instance.id
   
+  
   zones {
       subnet_id = ibm_is_subnet.subnet_cluster.id
       name      = "eu-gb-2"
