@@ -19,11 +19,6 @@ resource "ibm_is_vpc" "vpc_bd" {
   resource_group = var.rg-name
 }
 
-# Crear VPC para "vpc-cluster"
-resource "ibm_is_vpc" "vpc_cluster" {
-  name           = "vpc-cluster-vsanchez"
-  resource_group = var.rg-name
-}
 
 resource "ibm_is_public_gateway" "public_gateway" {
   name   = "public-gateway-bd"
