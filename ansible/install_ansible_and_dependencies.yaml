@@ -26,13 +26,6 @@
         name: ansible
         state: present
 
-    # Paso 6: Verificar instalación de Ansible
-    - name: Verify Ansible Installation
-      command: ansible --version
-      register: ansible_version
-    - debug:
-        msg: "Ansible Version: {{ ansible_version.stdout }}"
-
     # Paso 7: Instalar rol de Ansible desde Galaxy
     - name: Install Ansible Galaxy Role
       ansible.builtin.command:
