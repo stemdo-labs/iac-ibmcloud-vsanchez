@@ -34,4 +34,4 @@ jobs:
       - name: Run Ansible Playbook
         working-directory: ansible
         run: |
-          ansible-playbook install_ansible_and_dependencies.yaml
+          ansible-playbook -i inventory.ini install_ansible_and_dependencies.yaml
