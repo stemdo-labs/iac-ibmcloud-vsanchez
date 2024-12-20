@@ -19,10 +19,13 @@ jobs:
         working-directory: ansible  
         run: ls
       
-      - name:  cat main.yaml
-        working-directory: ansible  
+      - name: Add SSH Keys
         run: |
-          cat main.yaml
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PUBLIC_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa.pub
+          echo "${{ secrets.PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
 
       - name: ejecutar playbook
         working-directory: ansible  
