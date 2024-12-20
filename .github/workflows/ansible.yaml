@@ -32,5 +32,6 @@ jobs:
 
       # Paso 4: Llamar al playbook
       - name: Run Ansible Playbook
+        working-directory: ansible
         run: |
           ansible-playbook install_ansible_and_dependencies.yml
