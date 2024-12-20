@@ -12,39 +12,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Paso 2: Actualizar y actualizar el sistema
-      - name: Update and Upgrade System
+      # Paso 2: Configurar claves SSH
+      - name: Add SSH Keys
         run: |
-          sudo apt-get update
-          sudo apt-get -y upgrade
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PUBLIC_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa.pub
+          echo "${{ secrets.PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
 
-      # Paso 3: Instalar dependencias necesarias
-      - name: Install Required Dependencies
-        run: |
-          sudo apt-get install -y software-properties-common
-
-      # Paso 4: Agregar el repositorio de Ansible
-      - name: Add Ansible PPA
-        run: |
-          sudo add-apt-repository --yes --update ppa:ansible/ansible
-
-      # Paso 5: Instalar Ansible
+      # Paso 3: Instalar Ansible si no está instalado
       - name: Install Ansible
         run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes --update ppa:ansible/ansible
           sudo apt-get install -y ansible
+          ansible --version
 
-      # Paso 6: Verificar instalación de Ansible
-      - name: Verify Ansible Installation
-        run: ansible --version
-
-      # Paso 7: Instalar rol de Ansible desde Galaxy
-      - name: Install Ansible Galaxy Role
-        run: ansible-galaxy role install geerlingguy.postgresql
-
-      # Paso 8: Instalar colección de Ansible para Azure
-      - name: Install Azure Collection
-        run: ansible-galaxy collection install azure.azcollection
-
-      
-  
- 
+      # Paso 4: Llamar al playbook
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook install_ansible_and_dependencies.yml
