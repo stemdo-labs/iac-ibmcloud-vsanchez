@@ -5,7 +5,7 @@ on:
 
 jobs:
   install-ansible:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       # Paso 1: Clonar el repositorio
