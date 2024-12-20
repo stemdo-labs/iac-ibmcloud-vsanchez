@@ -35,4 +35,4 @@ jobs:
         working-directory: ansible
         run: |
           ls
-          ansible-playbook install_ansible_and_dependencies.yml
+          ansible-playbook install_ansible_and_dependencies.yaml
