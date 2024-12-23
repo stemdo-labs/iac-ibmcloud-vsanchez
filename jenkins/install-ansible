@@ -21,13 +21,6 @@ pipeline {
             }
         }
  
-        stage('Checkout Repository') {
-            steps {
-                sh '''
-                git clone git@github.com:stemdo-labs/iac-ibmcloud-vsanchez.git
-                '''
-            }
-        }
  
         stage('Install Ansible') {
             steps {
