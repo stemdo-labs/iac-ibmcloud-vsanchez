@@ -17,15 +17,15 @@ provider "ibm" {
 resource "ibm_is_public_gateway" "public_gateway" {
   name   = "public-gateway-bd"
   vpc    = "r050-704ad056-5260-496d-b020-cf230572c5e4"
-  zone   = "eu-es-1"
+  zone   = "eu-es-2"
   resource_group = var.rg-name
 }
 # Crear Subnet para "vpc-bd" en Londres
 resource "ibm_is_subnet" "subnet_bd" {
   name            = "subnet-bd-vsanchez"
   vpc             = "r050-704ad056-5260-496d-b020-cf230572c5e4"
-  zone            = "eu-gb-1" # Zona de Londres
-  ipv4_cidr_block = "10.251.0.0/24" # Cambia por el rango CIDR que necesites
+  zone            = "eu-es-2" 
+  ipv4_cidr_block = "10.251.64.0/24" # Cambia por el rango CIDR que necesites
   resource_group  = var.rg-name
   public_gateway = ibm_is_public_gateway.public_gateway.id
 }
@@ -75,7 +75,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
   vpc =  "r050-704ad056-5260-496d-b020-cf230572c5e4"
-  zone =  "eu-gb-1"
+  zone =  "eu-es-1"
   resource_group = var.rg-name
   keys = [ ibm_is_ssh_key.ssh_key.id ]
 
@@ -85,7 +85,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
     security_groups  = [ibm_is_security_group.ssh_security_group.id]
     primary_ip {
     auto_delete       = false
-    address             = "10.251.0.8"
+    address             = "10.251.64.8"
     }
     
   }
