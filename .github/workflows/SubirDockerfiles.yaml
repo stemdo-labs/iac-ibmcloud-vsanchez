@@ -27,6 +27,8 @@ on:
         required: true
       DB_PASSWORD:
         required: true
+      APIKEY:
+        required: true
 
 jobs:
   set-environment:
@@ -123,20 +125,32 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      - name: Iniciar sesión en Azure
-        uses: azure/login@v1
-        with:
-          creds: |
-            {
-              "clientId": "${{ secrets.ARM_CLIENT_ID }}",
-              "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
-              "tenantId": "${{ secrets.ARM_TENANT_ID }}",
-              "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
-            }
+      # - name: Iniciar sesión en Azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: |
+      #       {
+      #         "clientId": "${{ secrets.ARM_CLIENT_ID }}",
+      #         "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
+      #         "tenantId": "${{ secrets.ARM_TENANT_ID }}",
+      #         "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+      #       }
 
-      - name: Login en Azure Container Registry
+      # - name: Login en Azure Container Registry
+      #   run: |
+      #     az acr login --name containerregistryvsanchez
+
+      - name: Instalar IBM Cloud CLI
         run: |
-          az acr login --name containerregistryvsanchez
+          curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+          ibmcloud plugin install container-registry -r 'IBM Cloud'
+          ibmcloud plugin install container-service -r 'IBM Cloud'
+          
+      - name: Ibm Cloud Login
+        run: |
+          ibmcloud login --apikey ${{ secrets.APIKEY }} -r eu-gb
+          ibmcloud target -g Stemdo_Sandbox
+          ibmcloud cr login
 
       - name: Extraer versión desde package.json (Frontend)
         if: ${{ inputs.MICROSERVICE == 'frontend' }}
@@ -157,22 +171,40 @@ jobs:
         run: |
           docker build -t imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} .
 
+      # - name: taggear la imagen
+      #   if: ${{ inputs.MICROSERVICE == 'frontend' }}
+      #   run: |
+      #     docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
+      
+      # - name: taggear la imagen
+      #   if: ${{ inputs.MICROSERVICE == 'backend' }}
+      #   run: |
+      #     docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
+      
+      # - name: Pushear imagen (Frontend)
+      #   if: ${{ inputs.MICROSERVICE == 'frontend' }}
+      #   run: |
+      #     docker push containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
+
+      # - name: Pushear imagen (Backend)
+      #   if: ${{ inputs.MICROSERVICE == 'backend' }}
+      #   run: |
+      #     docker push containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
       - name: taggear la imagen
         if: ${{ inputs.MICROSERVICE == 'frontend' }}
         run: |
-          docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
+          docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}  uk.icr.io/cr-vsanchez/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
       
       - name: taggear la imagen
         if: ${{ inputs.MICROSERVICE == 'backend' }}
         run: |
-          docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
-      
+          docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} uk.icr.io/cr-vsanchez/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
       - name: Pushear imagen (Frontend)
         if: ${{ inputs.MICROSERVICE == 'frontend' }}
         run: |
-          docker push containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
+          docker push uk.icr.io/cr-vsanchez/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
 
       - name: Pushear imagen (Backend)
         if: ${{ inputs.MICROSERVICE == 'backend' }}
         run: |
-          docker push containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
+          docker push  uk.icr.io/cr-vsanchez/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}

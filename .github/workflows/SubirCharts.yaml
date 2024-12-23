@@ -19,6 +19,8 @@ on:
         required: true
       ARM_SUBSCRIPTION_ID:  
         required: true
+      APIKEY:
+        required: true
       
  
 jobs:
@@ -44,33 +46,56 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      - name: Iniciar sesión en Azure
-        uses: azure/login@v1
-        with:
-          creds: |
-            {
-              "clientId": "${{ secrets.ARM_CLIENT_ID }}",
-              "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
-              "tenantId": "${{ secrets.ARM_TENANT_ID }}",
-              "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
-            }
+      # - name: Iniciar sesión en Azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: |
+      #       {
+      #         "clientId": "${{ secrets.ARM_CLIENT_ID }}",
+      #         "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
+      #         "tenantId": "${{ secrets.ARM_TENANT_ID }}",
+      #         "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+      #       }
 
-      - name: Login en Azure Container Registry
+      # - name: Login en Azure Container Registry
+      #   run: |
+      #     az acr login --name containerregistryvsanchez
+      - name: Instalar IBM Cloud CLI
         run: |
-          az acr login --name containerregistryvsanchez
+          curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+          ibmcloud plugin install container-registry -r 'IBM Cloud'
+          ibmcloud plugin install container-service -r 'IBM Cloud'
+          
+      - name: Ibm Cloud Login
+        run: |
+          ibmcloud login --apikey ${{ secrets.APIKEY }} -r eu-gb
+          ibmcloud target -g Stemdo_Sandbox
+          ibmcloud cr login
+
+      # - name: Subir
+      #   # helm registry login harbor.codeops.es -u vsanchez -p $HARBOR_PASSWORD
+      #   #  helm push $CHART_FILE oci://harbor.codeops.es/vsanchez
+      #   env:
+      #     HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+      #     NAME_CHART: ${{ inputs.MICROSERVICE }}
+      #   run: |
+      #     cd charts/
+      #     ls
+      #     CHART_FILE=$(ls -t *${NAME_CHART}-*.tgz | head -n 1)
+      #     echo "Subiendo chart ${CHART_FILE}"
+      #     helm push ${CHART_FILE} oci://containerregistryvsanchez.azurecr.io
 
       - name: Subir
+        working-directory: charts
         # helm registry login harbor.codeops.es -u vsanchez -p $HARBOR_PASSWORD
         #  helm push $CHART_FILE oci://harbor.codeops.es/vsanchez
         env:
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
           NAME_CHART: ${{ inputs.MICROSERVICE }}
         run: |
-          cd charts/
-          ls
           CHART_FILE=$(ls -t *${NAME_CHART}-*.tgz | head -n 1)
           echo "Subiendo chart ${CHART_FILE}"
-          helm push ${CHART_FILE} oci://containerregistryvsanchez.azurecr.io
+          helm push ${CHART_FILE} oci://uk.icr.io/cr-vsanchez
 
 
           
