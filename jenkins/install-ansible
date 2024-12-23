@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+ 
+    environment {
+        // Carga las claves desde las credenciales en Jenkins
+        PUBLIC_KEY = credentials('PUBLIC_KEY')  // ID de la clave pública en Jenkins
+        PRIVATE_KEY = credentials('PRIVATE_KEY') // ID de la clave privada en Jenkins
+    }
+ 
+    stages {
+        stage('Setup SSH Keys') {
+            steps {
+                sh '''
+                mkdir -p ~/.ssh
+                echo "${PRIVATE_KEY}" > ~/.ssh/id_rsa
+                echo "${PUBLIC_KEY}" > ~/.ssh/id_rsa.pub
+                chmod 600 ~/.ssh/id_rsa
+                chmod 644 ~/.ssh/id_rsa.pub
+                ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                '''
+            }
+        }
+ 
+        stage('Checkout Repository') {
+            steps {
+                sh '''
+                git clone git@github.com:stemdo-labs/iac-ibmcloud-vsanchez.git
+                '''
+            }
+        }
+ 
+        stage('Install Ansible') {
+            steps {
+                sh '''
+                sudo apt-get update
+                sudo apt-get install -y software-properties-common
+                sudo add-apt-repository --yes --update ppa:ansible/ansible
+                sudo apt-get install -y ansible
+                ansible --version
+                '''
+            }
+        }
+ 
+        stage('Run Ansible Playbook') {
+            steps {
+                sh '''
+                cd ansible
+                ansible-playbook -i inventory.ini install_ansible_and_dependencies.yaml
+                '''
+            }
+        }
+    }
+ 
+    post {
+        always {
+            echo 'Pipeline completed!'
+        }
+    }
+}
