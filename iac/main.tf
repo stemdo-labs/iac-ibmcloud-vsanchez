@@ -9,7 +9,7 @@ terraform {
 
 provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key # API Key de IBM Cloud
-  region           = "eu-gb"          # Región inicial
+  region           = "eu-es"          # Región inicial
   
 }
 
@@ -22,28 +22,20 @@ resource "ibm_is_vpc" "vpc_bd" {
 
 resource "ibm_is_public_gateway" "public_gateway" {
   name   = "public-gateway-bd"
-  vpc    = ibm_is_vpc.vpc_bd.id
-  zone   = "eu-gb-1"
+  vpc    = "r050-704ad056-5260-496d-b020-cf230572c5e4"
+  zone   = "eu-es-1"
   resource_group = var.rg-name
 }
 # Crear Subnet para "vpc-bd" en Londres
 resource "ibm_is_subnet" "subnet_bd" {
   name            = "subnet-bd-vsanchez"
-  vpc             = ibm_is_vpc.vpc_bd.id
-  zone            = "eu-gb-1" # Zona de Londres
-  ipv4_cidr_block = "10.242.0.0/24" # Cambia por el rango CIDR que necesites
+  vpc             = "r050-704ad056-5260-496d-b020-cf230572c5e4"
+  zone            = "eu-es-1" # Zona de Londres
+  ipv4_cidr_block = "10.251.0.0/24" # Cambia por el rango CIDR que necesites
   resource_group  = var.rg-name
   public_gateway = ibm_is_public_gateway.public_gateway.id
 }
 
-
-
-resource "ibm_is_floating_ip" "public_ip" {
-  name            = "public-ip-vm-bd-vsanchez"
-  resource_group  = var.rg-name
-  target          = ibm_is_instance.instance_vsanchez.primary_network_interface.0.id
-
-}
 
 
  # acr
@@ -54,7 +46,7 @@ resource "ibm_cr_namespace" "rg_namespace" {
 
 resource "ibm_is_security_group" "ssh_security_group" {
   name   = "ssh-security-group"
-  vpc    = ibm_is_vpc.vpc_bd.id 
+  vpc    = "r050-704ad056-5260-496d-b020-cf230572c5e4" 
   resource_group = var.rg-name
 }
 
@@ -88,8 +80,8 @@ resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
-  vpc =  ibm_is_vpc.vpc_bd.id
-  zone =  "eu-gb-1"
+  vpc =  "r050-704ad056-5260-496d-b020-cf230572c5e4"
+  zone =  "eu-es-1"
   resource_group = var.rg-name
   keys = [ ibm_is_ssh_key.ssh_key.id ]
 
@@ -99,7 +91,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
     security_groups  = [ibm_is_security_group.ssh_security_group.id]
     primary_ip {
     auto_delete       = false
-    address             = "10.242.0.8"
+    address             = "10.251.0.8"
     }
     
   }
