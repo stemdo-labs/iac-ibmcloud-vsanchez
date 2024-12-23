@@ -12,8 +12,8 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p ~/.ssh
-                echo "${PRIVATE_KEY}" > ~/.ssh/id_rsa
-                echo "${PUBLIC_KEY}" > ~/.ssh/id_rsa.pub
+                echo "${PRIVATE_KEY_VSANCHEZ}" > ~/.ssh/id_rsa
+                echo "${PUBLIC_KEY_VSANCHEZ}" > ~/.ssh/id_rsa.pub
                 chmod 600 ~/.ssh/id_rsa
                 chmod 644 ~/.ssh/id_rsa.pub
                 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
