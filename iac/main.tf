@@ -35,6 +35,10 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
   port_min       = 22
   port_max       = 22
   }
+  icmp {
+    type = 1
+    code = 1
+  }
   
 }
 resource "ibm_is_security_group_rule" "allow_outbound" {
