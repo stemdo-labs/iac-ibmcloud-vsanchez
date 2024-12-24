@@ -84,6 +84,13 @@ resource "ibm_is_instance" "instance_vsanchez" {
     }
     
   }
+user_data = <<EOT
+#cloud-config
+chpasswd:
+  list: |
+    root:password
+  expire: false
+EOT
 }
 
 
