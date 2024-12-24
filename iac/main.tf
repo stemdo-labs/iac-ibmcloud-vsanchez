@@ -35,12 +35,22 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
   port_min       = 22
   port_max       = 22
   }
+
+  
+}
+resource "ibm_is_security_group_rule" "allow_ping" {
+  direction      = "inbound"
+  remote         = "0.0.0.0/0" 
+  ip_version     = "ipv4"
+  group =  "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"
   icmp {
     type = 1
     code = 1
   }
+
   
 }
+ 
 resource "ibm_is_security_group_rule" "allow_outbound" {
   direction      = "outbound"
   remote         = "0.0.0.0/0" 
