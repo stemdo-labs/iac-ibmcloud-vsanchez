@@ -61,7 +61,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   keys = [ ibm_is_ssh_key.ssh_key.id ]
 
   primary_network_interface {
-    subnet = ibm_is_subnet.subnet_bd.id
+    subnet = "02w7-ab2a02a4-4a83-452b-951c-c7e3989800db"
     allow_ip_spoofing = true
     security_groups  = ["r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"]
     primary_ip {
