@@ -55,7 +55,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
-  vpc =  "r050-704ad056-5260-496d-b020-cf230572c5e4"
+  vpc = "r050-4368bf72-fe4a-4fb0-a7ff-baccf91a74a4"
   zone =  "eu-es-2"
   resource_group = var.rg-name
   keys = [ ibm_is_ssh_key.ssh_key.id ]
