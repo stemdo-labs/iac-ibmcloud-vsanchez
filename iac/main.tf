@@ -66,7 +66,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
     security_groups  = [ "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f" ]
     primary_ip {
     auto_delete       = false
-    address             = "10.251.0.8"
+    address             = "10.251.0.33"
     }
     
   }
