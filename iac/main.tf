@@ -44,8 +44,8 @@ resource "ibm_is_security_group_rule" "allow_ping" {
   ip_version     = "ipv4"
   group =  "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"
   icmp {
-    type = 0
-    code = 8
+    type = 8
+    code = 0
   }
 
   
