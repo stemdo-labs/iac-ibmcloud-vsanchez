@@ -63,7 +63,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   primary_network_interface {
     subnet = "02w7-ab2a02a4-4a83-452b-951c-c7e3989800db"
     allow_ip_spoofing = true
-    security_groups  = ["r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"]
+    security_groups  = [ "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f" ]
     primary_ip {
     auto_delete       = false
     address             = "10.251.64.8"
