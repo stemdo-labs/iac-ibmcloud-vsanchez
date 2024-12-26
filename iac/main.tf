@@ -12,25 +12,41 @@ provider "ibm" {
   region           = "eu-es"          # Región inicial
   
 }
-
-
-
-
-
  # acr
 resource "ibm_cr_namespace" "rg_namespace" {
   name              = "cr-vsanchez"
   resource_group_id = var.rg-name
 }
 
+resource "ibm_is_public_gateway" "public_gateway" {
+  name   = "public-gateway-bd"
+  vpc    = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
+  zone   = "eu-es-1"
+  resource_group = var.rg-name
+}
+# Crear Subnet para "vpc-bd" en Londres
+resource "ibm_is_subnet" "subnet_bd" {
+  name            = "subnet-bd-vsanchez"
+  vpc             = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
+  zone            = "eu-es-1" 
+  ipv4_cidr_block = "10.251.33.33/24" 
+  resource_group  = var.rg-name
+  public_gateway = ibm_is_public_gateway.public_gateway.id
+}
 
+resource "ibm_is_security_group" "security_group-vsanchez" {
+  name = "security-group-vsanchez"
+  resource_group = var.rg-name
+  vpc = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
+  
+}
 
 # Crear una regla para habilitar el puerto 22 (SSH)
 resource "ibm_is_security_group_rule" "allow_ssh" {
   direction      = "inbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
-  group =  "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"
+  group =  ibm_is_security_group.security_group-vsanchez.id
   tcp {
   port_min       = 22
   port_max       = 22
@@ -42,7 +58,7 @@ resource "ibm_is_security_group_rule" "allow_ping" {
   direction      = "inbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
-  group =  "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"
+  group =  ibm_is_security_group.security_group-vsanchez.id
   icmp {
     type = 8
     code = 0
@@ -55,7 +71,7 @@ resource "ibm_is_security_group_rule" "allow_outbound" {
   direction      = "outbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
-  group =  "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f"
+  group =  ibm_is_security_group.security_group-vsanchez.id
 }
 
 resource "ibm_is_ssh_key" "ssh_key" {
