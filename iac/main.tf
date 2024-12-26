@@ -18,12 +18,7 @@ resource "ibm_cr_namespace" "rg_namespace" {
   resource_group_id = var.rg-name
 }
 
-resource "ibm_is_public_gateway" "public_gateway" {
-  name   = "public-gateway-bd"
-  vpc    = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
-  zone   = "eu-es-1"
-  resource_group = var.rg-name
-}
+
 # Crear Subnet para "vpc-bd" en Londres
 resource "ibm_is_subnet" "subnet_bd" {
   name            = "subnet-bd-vsanchez"
