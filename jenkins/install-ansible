@@ -1,26 +1,22 @@
 pipeline {
     agent any
- 
+
     environment {
-        // Carga las claves desde las credenciales en Jenkins
-        PUBLIC_KEY = credentials('PUBLIC_KEY_VSANCHEZ')  // ID de la clave pública en Jenkins
-        PRIVATE_KEY = credentials('PRIVATE_KEY_VSANCHEZ') // ID de la clave privada en Jenkins
+        // Usa la credencial SSH configurada como recurso en Jenkins
+        SSH_KEY = credentials('SSH-KEY-VSANCHEZ') // ID de la credencial SSH en Jenkins
     }
- 
+
     stages {
         stage('Setup SSH Keys') {
             steps {
                 sh '''
                 mkdir -p ~/.ssh
-                echo "${PRIVATE_KEY}" > ~/.ssh/id_rsa
-                echo "${PUBLIC_KEY}" > ~/.ssh/id_rsa.pub
+                echo "${SSH_KEY}" > ~/.ssh/id_rsa
                 chmod 600 ~/.ssh/id_rsa
-                chmod 644 ~/.ssh/id_rsa.pub
                 '''
             }
         }
- 
- 
+
         stage('Install Ansible') {
             steps {
                 sh '''
@@ -34,7 +30,7 @@ pipeline {
                 '''
             }
         }
- 
+
         stage('Run Ansible Playbook') {
             steps {
                 sh '''
@@ -44,7 +40,7 @@ pipeline {
             }
         }
     }
- 
+
     post {
         always {
             echo 'Pipeline completed!'
