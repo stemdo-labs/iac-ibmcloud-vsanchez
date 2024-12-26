@@ -29,7 +29,7 @@ resource "ibm_is_subnet" "subnet_bd" {
   name            = "subnet-bd-vsanchez"
   vpc             = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
   zone            = "eu-es-1" 
-  ipv4_cidr_block = "10.251.33.33/24" 
+  ipv4_cidr_block = "10.251.10.0/24" 
   resource_group  = var.rg-name
   public_gateway = ibm_is_public_gateway.public_gateway.id
 }
