@@ -85,13 +85,13 @@ resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
-  vpc = "r050-4368bf72-fe4a-4fb0-a7ff-baccf91a74a4"
+  vpc = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
   zone =  "eu-es-1"
   resource_group = var.rg-name
   keys = [ ibm_is_ssh_key.ssh_key.id ]
 
   primary_network_interface {
-    subnet = "02w7-ab2a02a4-4a83-452b-951c-c7e3989800db"
+    subnet = ibm_is_subnet.subnet_bd.id
     allow_ip_spoofing = true
     security_groups  = [ "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f" ]
     primary_ip {
