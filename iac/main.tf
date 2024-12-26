@@ -87,8 +87,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
 
   primary_network_interface {
     subnet = ibm_is_subnet.subnet_bd.id
-    allow_ip_spoofing = true
-    security_groups  = [ "r050-9f6429bf-2632-47bb-8f21-822e71b04a3f" ]
+    allow_ip_spoofing = [ ibm_is_security_group.security_group-vsanchez.id ] 
     primary_ip {
     auto_delete       = false
     address             = "10.251.10.34"
