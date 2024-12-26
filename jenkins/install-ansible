@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Usa la credencial SSH configurada como recurso en Jenkins
-        SSH_KEY = credentials('SSH-KEY-VSANCHEZ') // ID de la credencial SSH en Jenkins
+        SSH_KEY = credentials('SSHKEY-VSANCHEZ') // ID de la credencial SSH en Jenkins
     }
 
     stages {
