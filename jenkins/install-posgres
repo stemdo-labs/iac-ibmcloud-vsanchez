@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        KEY_SECRET = credentials('KEY_SECRET') // Almacena como secreto en Jenkins
+        PUBLIC_KEY = credentials('PUBLIC_KEY') // Clave pública
+        PRIVATE_KEY = credentials('PRIVATE_KEY') // Clave privada
+        USER_PASSWORD = credentials('USER_PASSWORD') // Contraseña de usuario
+    }
+
+    stages {
+        stage('Clonar Repositorio') {
+            steps {
+                git branch: 'main', url: 'git@github.com:tu-repositorio.git' // Actualiza la URL
+            }
+        }
+
+        stage('Agregar Contraseña del Secret') {
+            steps {
+                sh '''
+                echo $KEY_SECRET > ansible/secreto.txt
+                '''
+            }
+        }
+
+        stage('Mostrar Archivos') {
+            steps {
+                sh '''
+                ls ansible
+                '''
+            }
+        }
+
+        stage('Agregar Llaves SSH') {
+            steps {
+                sh '''
+                mkdir -p ~/.ssh
+                echo "$PUBLIC_KEY" | tr -d '\r' > ~/.ssh/id_rsa.pub
+                echo "$PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+                chmod 644 ~/.ssh/id_rsa.pub
+                '''
+            }
+        }
+
+        stage('Instalar Ansible') {
+            steps {
+                sh '''
+                sudo apt-get update
+                sudo apt-get install -y software-properties-common
+                sudo add-apt-repository --yes --update ppa:ansible/ansible
+                sudo apt-get install -y ansible
+                ansible --version
+                '''
+            }
+        }
+
+        stage('Ejecutar Playbook') {
+            steps {
+                sh '''
+                ansible-playbook ansible/main.yaml -i ansible/inventory.ini \
+                --vault-password-file ansible/secreto.txt \
+                --become \
+                --extra-vars "ansible_become_password=$USER_PASSWORD"
+                '''
+            }
+        }
+    }
+}

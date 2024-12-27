@@ -71,8 +71,4 @@
         name: postgresql
         state: restarted
 
-    # - name: Configurar la contraseña del usuario PostgreSQL
-    #   become: true
-    #   become_user: postgres
-    #   shell: |
-    #     psql -c "ALTER USER {{ postgres_user }} WITH PASSWORD '{{ postgres_password }}';"
+
