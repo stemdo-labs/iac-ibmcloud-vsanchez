@@ -86,6 +86,7 @@ pipeline {
         stage('Subir Chart') {
             steps {
                 script {
+                    cd charts/
                     def chartFile = sh(script: "ls -t *${params.MICROSERVICE}-*.tgz | head -n 1", returnStdout: true).trim()
                     echo "Subiendo chart ${chartFile}"
                     sh "helm push ${chartFile} oci://uk.icr.io/cr-vsanchez"
