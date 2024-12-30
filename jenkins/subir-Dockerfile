@@ -124,9 +124,6 @@ pipeline {
         stage('Extraer Versión') {
             steps {
                 script {
-                    // Mostrar los archivos del directorio actual y verificar pom.xml
-                    sh 'ls -l'
-                    sh 'cat pom.xml | head -n 20'
 
                     
                     if (params.MICROSERVICE == 'frontend') {
