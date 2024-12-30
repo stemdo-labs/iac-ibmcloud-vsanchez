@@ -1,0 +1,159 @@
+pipeline {
+        agent {
+                kubernetes {
+                    label 'charts-builder'
+                    defaultContainer 'tools'
+                    yaml """
+        apiVersion: v1
+        kind: Pod
+        spec:
+          containers:
+            - name: tools
+              image: ubuntu:22.04
+              command:
+              - cat
+              tty: true
+              securityContext:
+                privileged: true
+              volumeMounts:
+              - mountPath: "/usr/local/bin"
+                name: bin-volume
+              - mountPath: "/home/jenkins/agent"
+                name: workspace-volume
+              - mountPath: "/var/lib/docker"
+                name: docker-volume
+          volumes:
+          - emptyDir: {}
+            name: bin-volume
+          - emptyDir:
+              medium: ""
+            name: workspace-volume
+          - emptyDir: {}
+            name: docker-volume
+        """
+                }
+        }  
+    environment {
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
+    }
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
+        string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Microservicio a desplegar (backend/frontend)')
+    }
+    stages {
+        stage('Mostrar Configuración') {
+            steps {
+                echo "Configuración elegida:"
+                echo "Microservicio: ${MICROSERVICE}"
+                echo "Ambiente: ${params.ENVIRONMENT}"
+            }
+        }
+        stage('Test Frontend') {
+            when {
+                allOf {
+                    expression { params.MICROSERVICE == 'frontend' }
+                    expression { params.ENVIRONMENT == 'production' }
+                }
+            }
+            steps {
+                echo "Configurando y ejecutando linte"
+                sh """
+                npm install eslint --save-dev
+                npx eslint --init
+                npx eslint . --ext .js,.jsx,.ts,.tsx
+                """
+            }
+        }
+        stage('Configurar default.conf') {
+            when {
+                expression { params.MICROSERVICE == 'frontend' }
+            }
+            steps {
+                script {
+                    def confPath = "default.conf"
+                    def backendUrl = params.ENVIRONMENT == 'develop' 
+                        ? "http://backend-develop-svc:8080" 
+                        : "http://backend-production-svc:8080"
+                    def location = params.ENVIRONMENT == 'develop' 
+                        ? "/dev-vsanchez" 
+                        : "/prod-vsanchez"
+                    sh """
+                    sed -i "s|proxy_pass http://svc-backend:8080;|proxy_pass ${backendUrl};|g" ${confPath}
+                    sed -i "s|location /pepe-vsanchez |location ${location} |g" ${confPath}
+                    """
+                    sh "cat ${confPath}"
+                }
+            }
+        }
+        stage('Preparar Entorno') {
+            steps {
+                    sh '''
+                        apt-get update && apt-get install -y curl bash git docker.io
+                        curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
+                        ibmcloud plugin install container-registry -r 'IBM Cloud'
+                        dockerd > /var/log/dockerd.log 2>&1 &
+                        sleep 10
+                        docker version
+                        ibmcloud --version
+                        ibmcloud plugin list
+                    '''
+                
+            }
+        }
+        stage('Login IBM Cloud') {
+            steps {
+                sh """
+                ibmcloud login --apikey ${APIKEY} -r eu-gb
+                ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr login
+                ibmcloud cr namespace-add cr-vsanchez
+                """
+            }
+        }
+
+        stage('Extraer Versión') {
+            steps {
+                script {
+                    // Mostrar los archivos del directorio actual y verificar pom.xml
+                    sh 'ls -l'
+                    sh 'cat pom.xml | head -n 20'
+
+                    
+                    if (params.MICROSERVICE == 'frontend') {
+                        // Extraer versión del archivo package.json para frontend
+                        env.VERSION = sh(
+                            script: "node -pe 'require(\"./package.json\").version'",
+                            returnStdout: true
+                        ).trim()
+                    } else if (params.MICROSERVICE == 'backend'){
+                        echo " extrayendo versión del archivo pom.xml"
+                        env.VERSION = sh(
+                            script: """
+                            awk '/<artifactId>rh<\\/artifactId>/,/<\\/project>/{
+                                if (\$0 ~ /<version>/) {
+                                    print \$0
+                                }
+                            }' pom.xml | sed -n '1p' | sed -E 's/.*<version>(.*)<\\/version>.*/\\1/'
+                            """,
+                            returnStdout: true
+                        ).trim()
+                    }
+
+                    echo "Versión detectada: ${env.VERSION}"
+                }
+            }
+        }
+        stage('Construir Imagen') {
+            steps {
+                sh "docker build -t uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION} ."
+            }
+        }
+        stage('Pushear Imagen') {
+            steps {
+                sh """
+                docker push uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION}
+                """
+            }
+        }
+    }
+}
