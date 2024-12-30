@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
+    }
+
+    parameters {
+        string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Nombre del microservicio')
+    }
+
+    stages {
+
+        stage('Instalar Helm') {
+            steps {
+                sh '''
+                curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+                '''
+            }
+        }
+
+        stage('Empaquetar') {
+            steps {
+                sh '''
+                cd charts/
+                helm package ./chart-${MICROSERVICE}
+                '''
+            }
+        }
+
+        stage('Instalar CLI de Azure') {
+            steps {
+                sh '''
+                curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+                '''
+            }
+        }
+
+        stage('Instalar IBM Cloud CLI') {
+            steps {
+                sh '''
+                curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+                ibmcloud plugin install container-registry -r 'IBM Cloud'
+                ibmcloud plugin install container-service -r 'IBM Cloud'
+                '''
+            }
+        }
+
+        stage('Login en IBM Cloud') {
+            steps {
+                sh '''
+                ibmcloud login --apikey ${APIKEY} -r eu-gb
+                ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr login
+                '''
+            }
+        }
+
+        stage('Subir Chart') {
+            steps {
+                script {
+                    def chartFile = sh(script: "ls -t *${params.MICROSERVICE}-*.tgz | head -n 1", returnStdout: true).trim()
+                    echo "Subiendo chart ${chartFile}"
+                    sh "helm push ${chartFile} oci://uk.icr.io/cr-vsanchez"
+                }
+            }
+        }
+    }
+}
