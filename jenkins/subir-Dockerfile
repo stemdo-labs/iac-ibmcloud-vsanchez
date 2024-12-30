@@ -114,6 +114,7 @@ pipeline {
         stage('Login IBM Cloud') {
             steps {
                 sh """
+                ls -l
                 ibmcloud login --apikey ${APIKEY} -r eu-gb
                 ibmcloud target -g Stemdo_Sandbox
                 ibmcloud cr login
