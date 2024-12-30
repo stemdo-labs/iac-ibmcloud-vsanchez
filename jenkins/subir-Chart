@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'jnlp'
+        }
+    }
 
     environment {
         APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
