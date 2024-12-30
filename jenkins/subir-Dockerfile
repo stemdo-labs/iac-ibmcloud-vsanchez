@@ -43,6 +43,7 @@ pipeline {
     stages {
         stage('Mostrar Configuración') {
             steps {
+                ls -l
                 echo "Configuración elegida:"
                 echo "Microservicio: ${params.MICROSERVICE}"
                 echo "Ambiente: ${params.ENVIRONMENT}"
