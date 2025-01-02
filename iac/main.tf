@@ -26,6 +26,7 @@ resource "ibm_is_subnet" "subnet_bd" {
   zone            = "eu-es-1" 
   ipv4_cidr_block = "10.251.10.0/24" 
   resource_group  = var.rg-name
+  
 
 }
 
