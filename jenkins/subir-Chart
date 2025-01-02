@@ -37,12 +37,6 @@ pipeline {
             }
         }
 
-        stage('Instalar CLI de Azure') {
-            steps {
-                sh "curl -sL https://aka.ms/InstallAzureCLIDeb | bash"
-            }
-        }
-
         stage('Instalar IBM Cloud CLI') {
             steps {
                 sh '''
