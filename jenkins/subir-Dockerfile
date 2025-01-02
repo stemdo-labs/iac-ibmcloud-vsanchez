@@ -71,6 +71,7 @@ pipeline {
         }
         stage('Preparar Entorno') {
             steps {
+                dir('repo-principal') {
                     sh '''
                         curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
                         ibmcloud plugin install container-registry -r 'IBM Cloud'
@@ -80,6 +81,7 @@ pipeline {
                         ibmcloud plugin list
                     '''
                 
+                }
             }
         }
         stage('Login IBM Cloud') {
@@ -97,41 +99,45 @@ pipeline {
         stage('Extraer Versión') {
             steps {
                 script {
+                    dir('repo-principal') {
+                        if (params.MICROSERVICE == 'frontend') {
+                            env.VERSION = sh(
+                                script: "node -pe 'require(\"./package.json\").version'",
+                                returnStdout: true
+                            ).trim()
+                        } else if (params.MICROSERVICE == 'backend'){
+                            echo " extrayendo versión del archivo pom.xml"
+                            env.VERSION = sh(
+                                script: """
+                                awk '/<artifactId>rh<\\/artifactId>/,/<\\/project>/{
+                                    if (\$0 ~ /<version>/) {
+                                        print \$0
+                                    }
+                                }' pom.xml | sed -n '1p' | sed -E 's/.*<version>(.*)<\\/version>.*/\\1/'
+                                """,
+                                returnStdout: true
+                            ).trim()
+                        }
 
-                    
-                    if (params.MICROSERVICE == 'frontend') {
-                        env.VERSION = sh(
-                            script: "node -pe 'require(\"./package.json\").version'",
-                            returnStdout: true
-                        ).trim()
-                    } else if (params.MICROSERVICE == 'backend'){
-                        echo " extrayendo versión del archivo pom.xml"
-                        env.VERSION = sh(
-                            script: """
-                            awk '/<artifactId>rh<\\/artifactId>/,/<\\/project>/{
-                                if (\$0 ~ /<version>/) {
-                                    print \$0
-                                }
-                            }' pom.xml | sed -n '1p' | sed -E 's/.*<version>(.*)<\\/version>.*/\\1/'
-                            """,
-                            returnStdout: true
-                        ).trim()
+                        echo "Versión detectada: ${env.VERSION}"
                     }
-
-                    echo "Versión detectada: ${env.VERSION}"
                 }
             }
         }
         stage('Construir Imagen') {
             steps {
-                sh "docker build -t uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION} ."
+                dir('repo-principal') {
+                    sh "docker build -t uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION} ."
+                } 
             }
         }
         stage('Pushear Imagen') {
             steps {
-                sh """
-                docker push uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION}
-                """
+                dir('repo-principal') {
+                    sh """
+                    docker push uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION}
+                    """
+                }
             }
         }
     }
