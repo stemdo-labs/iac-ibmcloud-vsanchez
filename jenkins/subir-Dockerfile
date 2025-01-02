@@ -96,19 +96,30 @@ pipeline {
                 """
             }
         }
-
         stage('Extraer Versión') {
             steps {
                 script {
                     dir('repo-principal') {
                         sh "ls -l"
+
                         if (params.MICROSERVICE == 'frontend') {
+                            
+                            sh """
+                            if ! command -v node > /dev/null; then
+                                echo "Node.js no encontrado. Instalando..."
+                                curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                                apt-get install -y nodejs
+                            else
+                                echo "Node.js ya está instalado."
+                            fi
+                            """
+
                             env.VERSION = sh(
                                 script: "node -pe 'require(\"./package.json\").version'",
                                 returnStdout: true
                             ).trim()
-                        } else if (params.MICROSERVICE == 'backend'){
-                            echo " extrayendo versión del archivo pom.xml"
+                        } else if (params.MICROSERVICE == 'backend') {
+                            echo "Extrayendo versión del archivo pom.xml"
                             env.VERSION = sh(
                                 script: """
                                 awk '/<artifactId>rh<\\/artifactId>/,/<\\/project>/{
