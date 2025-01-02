@@ -34,7 +34,6 @@ pipeline {
                     sh """
                     sed -i 's/^name: .*/name: chart-${params.MICROSERVICE}-${environment}/' ${chartFile}
                     echo "Actualizado el nombre en Chart.yaml a chart-frontend-${environment}"
-                    cat chart-${params.MICROSERVICE}-${params.ENVIRONMENT}/Chart.yaml
                     """
                 }
             }
@@ -45,6 +44,7 @@ pipeline {
             steps {
                 sh '''
                 cd charts/
+                ls -l
                 helm package ./chart-${params.MICROSERVICE}-${params.ENVIRONMENT}
                 '''
             }
@@ -81,7 +81,7 @@ pipeline {
         stage('Subir Chart') {
             steps {
                 script {
-                    dir('charts') { // This changes to the 'charts' directory safely
+                    dir('charts') { 
                         def chartFile = sh(script: "ls -t *${params.MICROSERVICE}-${params.ENVIRONMENT}*.tgz | head -n 1", returnStdout: true).trim()
                         echo "Subiendo chart ${chartFile}"
                         sh "helm push ${chartFile} oci://uk.icr.io/cr-vsanchez"
