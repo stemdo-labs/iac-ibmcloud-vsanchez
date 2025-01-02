@@ -52,7 +52,8 @@ pipeline {
                     currentBuild.changeSets.any { cs ->
                         cs.items.any { item ->
                             item.affectedFiles.any { file ->
-                                file.path.endsWith('charts/chart-frontend/Chart.yaml') 
+                                file.path.endsWith('charts/chart-frontend/Chart.yaml')
+                                file.path.endsWith('jenkins/subir-Chart') 
                             }
                         }
                     } && ENVIRONMENT != ''
