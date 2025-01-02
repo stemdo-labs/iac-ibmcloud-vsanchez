@@ -22,7 +22,7 @@ resource "ibm_cr_namespace" "rg_namespace" {
 # Crear Subnet para "vpc-bd" en Londres
 resource "ibm_is_subnet" "subnet_bd" {
   name            = "subnet-bd-vsanchez"
-  vpc             = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
+  vpc             = var.vpc_id
   zone            = "eu-es-1" 
   ipv4_cidr_block = "10.251.10.0/24" 
   resource_group  = var.rg-name
@@ -32,7 +32,7 @@ resource "ibm_is_subnet" "subnet_bd" {
 resource "ibm_is_security_group" "security_group-vsanchez" {
   name = "security-group-vsanchez"
   resource_group = var.rg-name
-  vpc = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
+  vpc = var.vpc_id
   
 }
 
@@ -80,7 +80,7 @@ resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
-  vpc = "r050-a31d6fda-8952-48f3-9159-30b8635834b0"
+  vpc = var.vpc_id
   zone =  "eu-es-1"
   resource_group = var.rg-name
   keys = [ ibm_is_ssh_key.ssh_key.id ]

@@ -28,3 +28,9 @@ variable "public_ssh_key" {
   description = "Clave SSH para la VM"
   type        = string
 }
+variable "vpc_id" {
+  description = "ID de la VPC"
+  type        = string
+  sensitive = true
+  
+}
