@@ -27,16 +27,26 @@ pipeline {
         stage('Install Ansible') {
             steps {
                 sh '''
+                # Detectar si apt-get existe
+                if ! command -v apt-get >/dev/null 2>&1; then
+                    echo "apt-get no encontrado. Instalando paquetes necesarios..."
+                    apk update && apk add --no-cache bash curl gnupg lsb-release
+                fi
+
+                # Agregar repositorio de Ansible e instalar
                 apt-get update
                 apt-get install -y gnupg curl lsb-release software-properties-common
                 echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main" > /etc/apt/sources.list.d/ansible.list
                 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
                 apt-get update
                 apt-get install -y ansible
+
+                # Verificar instalación
                 ansible --version
                 '''
             }
         }
+
 
         stage('Run Ansible Playbook') {
             steps {
