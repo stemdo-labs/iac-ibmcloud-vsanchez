@@ -45,11 +45,11 @@ pipeline {
 
         stage('Instalar IBM Cloud CLI') {
             steps {
-                sh "
-                curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
+                sh '''
+                curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
                 ibmcloud plugin install container-registry -r 'IBM Cloud'
                 ibmcloud plugin install container-service -r 'IBM Cloud'
-                "
+                '''
             }
         }
 
