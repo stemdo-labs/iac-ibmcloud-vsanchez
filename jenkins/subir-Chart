@@ -28,15 +28,16 @@ pipeline {
         stage('Actualizar Chart.yaml') {
             steps {
                 script {
-                    def environment = params.ENVIRONMENT 
-                    def chartFile = "charts/chart-${params.MICROSERVICE}/Chart.yaml" 
+                def environment = params.ENVIRONMENT
+                def microservice = params.MICROSERVICE
+                def chartFile = "charts/chart-${microservice}/Chart.yaml"
 
-                    sh """
-                    sed -i 's/^name: .*/name: chart-${params.MICROSERVICE}-${params.ENVIRONMENT}/' ${chartFile}
-                    mv charts/chart-${params.MICROSERVICE}/ charts/chart-${params.MICROSERVICE}-${params.ENVIRONMENT}/
-                    echo "Actualizado el nombre en Chart.yaml a chart-frontend-${params.ENVIRONMENT}"
-                    cat charts/chart-${params.MICROSERVICE}-${params.ENVIRONMENT}/Chart.yaml
-                    """
+                sh """
+                echo "Procesando Chart.yaml en ${chartFile}"
+                sed -i 's/^name: .*/name: chart-${microservice}-${environment}/' ${chartFile}
+                mv charts/chart-${microservice}/ charts/chart-${microservice}-${environment}/
+                echo "Actualizado el nombre en Chart.yaml a chart-${microservice}-${environment}"
+                """
                 }
             }
         }
