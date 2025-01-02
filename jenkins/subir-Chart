@@ -34,7 +34,6 @@ pipeline {
                     sh """
                     sed -i 's/^name: .*/name: chart-${params.MICROSERVICE}-${environment}/' ${chartFile}
                     echo "Actualizado el nombre en Chart.yaml a chart-frontend-${environment}"
-                    cd 
                     cat charts/chart-${params.MICROSERVICE}/Chart.yaml
                     """
                 }
