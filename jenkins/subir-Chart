@@ -39,19 +39,17 @@ pipeline {
 
         stage('Instalar CLI de Azure') {
             steps {
-                sh '''
-                curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-                '''
+                sh "curl -sL https://aka.ms/InstallAzureCLIScript | bash"
             }
         }
 
         stage('Instalar IBM Cloud CLI') {
             steps {
-                sh '''
-                curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+                sh "
+                curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
                 ibmcloud plugin install container-registry -r 'IBM Cloud'
                 ibmcloud plugin install container-service -r 'IBM Cloud'
-                '''
+                "
             }
         }
 
