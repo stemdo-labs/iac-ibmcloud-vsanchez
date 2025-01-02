@@ -31,6 +31,21 @@ pipeline {
                 }
             }
         }
+        stage('Detectar archivos cambiados') {
+            steps {
+                script {
+                    echo "Archivos cambiados detectados:"
+                    currentBuild.changeSets.each { changeSet ->
+                        changeSet.items.each { item ->
+                            item.affectedFiles.each { file ->
+                                echo "Archivo: ${file.path}"
+            }
+        }
+    }
+}
+            }
+            
+        }
         stage('Ejecutar Chart de frontend') {
             when {
                 expression {
