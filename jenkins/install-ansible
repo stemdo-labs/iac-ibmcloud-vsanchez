@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Usa la credencial SSH configurada como recurso en Jenkins
-        SSH_KEY = credentials('SSHKEY-VSANCHEZ') // ID de la credencial SSH en Jenkins
+        PRIVATE_KEY = credentials('PRIVATE_KEY')
+        PUBLIC_KEY = credentials('PUBLIC_KEY') 
     }
 
     stages {
@@ -11,8 +11,10 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p ~/.ssh
-                echo "${SSH_KEY}" > ~/.ssh/id_rsa
+                echo "${PRIVATE_KEY}" > ~/.ssh/id_rsa
+                echo "${PUBLIC_KEY}" > ~/.ssh/id_rsa.pub
                 chmod 600 ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa.pub
                 '''
             }
         }
