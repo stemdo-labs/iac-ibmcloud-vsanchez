@@ -2,18 +2,12 @@ pipeline {
     agent any
 
     environment {
-        KEY_SECRET = credentials('KEY_SECRET') // Almacena como secreto en Jenkins
-        PUBLIC_KEY = credentials('PUBLIC_KEY') // Clave pública
-        PRIVATE_KEY = credentials('PRIVATE_KEY') // Clave privada
-        USER_PASSWORD = credentials('USER_PASSWORD') // Contraseña de usuario
+        KEY_SECRET = credentials('KEY_SECRET') 
+        SSHKEY = credentials('SSHKEY')
+        USER_PASSWORD = credentials('USER_PASSWORD') 
     }
 
     stages {
-        stage('Clonar Repositorio') {
-            steps {
-                git branch: 'main', url: 'git@github.com:tu-repositorio.git' // Actualiza la URL
-            }
-        }
 
         stage('Agregar Contraseña del Secret') {
             steps {
@@ -35,22 +29,21 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p ~/.ssh
-                echo "$PUBLIC_KEY" | tr -d '\r' > ~/.ssh/id_rsa.pub
-                echo "$PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+                cp "${SSHKEY}" ~/.ssh/id_rsa
                 chmod 600 ~/.ssh/id_rsa
-                chmod 644 ~/.ssh/id_rsa.pub
+                ssh-keyscan -H 10.251.10.34 >> ~/.ssh/known_hosts
                 '''
             }
         }
 
-        stage('Instalar Ansible') {
+        stage('Install Ansible') {
             steps {
                 sh '''
-                sudo apt-get update
-                sudo apt-get install -y software-properties-common
-                sudo add-apt-repository --yes --update ppa:ansible/ansible
-                sudo apt-get install -y ansible
-                ansible --version
+                if ! command -v ansible &> /dev/null; then
+                    echo "Instalando Ansible..."
+                    apk add --no-cache ansible
+                    ansible --version
+                fi
                 '''
             }
         }

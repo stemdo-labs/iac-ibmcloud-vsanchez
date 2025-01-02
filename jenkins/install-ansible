@@ -39,7 +39,6 @@ pipeline {
         stage('Install Ansible') {
             steps {
                 sh '''
-                # Asegurarse de tener los repositorios configurados y Ansible instalado
                 if ! command -v ansible &> /dev/null; then
                     echo "Instalando Ansible..."
                     apk add --no-cache ansible
