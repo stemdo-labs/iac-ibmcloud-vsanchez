@@ -107,7 +107,7 @@ pipeline {
                             sh """
                             if ! command -v node > /dev/null; then
                                 echo "Node.js no encontrado. Instalando..."
-                                curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                                curl -fsSL https://deb.nodesource.com/setup_18.x | bash 
                                 apt-get install -y nodejs
                             else
                                 echo "Node.js ya está instalado."
