@@ -53,6 +53,7 @@ pipeline {
             }
             steps {
                 script {
+                    sh "cd repo-principal "
                     def confPath = "default.conf"
                     def backendUrl = params.ENVIRONMENT == 'develop' 
                         ? "http://backend-develop-svc:8080" 
