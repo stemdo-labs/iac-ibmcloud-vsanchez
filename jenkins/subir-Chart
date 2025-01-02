@@ -49,12 +49,13 @@ pipeline {
         stage('Subir Chart') {
     steps {
         script {
-            dir('charts') {
+            
                 def chartPath = "./charts/chart-${params.MICROSERVICE}"
                     echo "Empaquetando ${chartPath}"
                     sh "helm package ${chartPath}"
+                dir('charts') {    
                 def serviceDir = "chart-${params.MICROSERVICE}"
-                
+
                 dir(serviceDir) {
                     echo "Entrando en la carpeta: ${serviceDir}"
                     
