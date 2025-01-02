@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+        }
+    }
 
     environment {
         PRIVATE_KEY = credentials('PRIVATE_KEY')
