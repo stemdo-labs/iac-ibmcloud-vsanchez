@@ -7,8 +7,8 @@ pipeline {
     }
 
     environment {
-        PRIVATE_KEY = credentials('PRIVATE_KEY')
-        PUBLIC_KEY = credentials('PUBLIC_KEY')
+        SSHKEY = credentials('SSHKEY')
+        
     }
 
     stages {
@@ -16,10 +16,9 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p ~/.ssh
-                echo "${PRIVATE_KEY}" > ~/.ssh/id_rsa
-                echo "${PUBLIC_KEY}" > ~/.ssh/id_rsa.pub
+                cp "${SSH_PRIVATE_KEY}" ~/.ssh/id_rsa              
                 chmod 600 ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa.pub
+
                 '''
             }
         }
