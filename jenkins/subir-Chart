@@ -58,16 +58,29 @@ pipeline {
         }
 
         stage('Subir Chart') {
-            steps {
-                script {
-                    dir('charts') { 
-                        cd "chart-${params.MICROSERVICE}"
-                        def chartFile = sh(script: "ls -t *${params.MICROSERVICE}-*.tgz | head -n 1", returnStdout: true).trim()
+    steps {
+        script {
+            dir('charts') {
+                
+                def serviceDir = "chart-${params.MICROSERVICE}"
+                dir(serviceDir) {
+                    echo "Entrando en la carpeta: ${serviceDir}"
+                    
+                    // Buscar el archivo .tgz más reciente dentro de la carpeta
+                    def chartFile = sh(script: "ls -t *.tgz | head -n 1", returnStdout: true).trim()
+
+                    
+                    if (chartFile) {
                         echo "Subiendo chart ${chartFile}"
                         sh "helm push ${chartFile} oci://uk.icr.io/cr-vsanchez"
+                    } else {
+                        error "No se encontró ningún archivo .tgz en la carpeta ${serviceDir}"
                     }
                 }
             }
         }
+    }
+}
+
     }
 }
