@@ -1,38 +1,10 @@
 pipeline {
-        agent {
-                kubernetes {
-                    label 'charts-builder'
-                    defaultContainer 'tools'
-                    yaml """
-        apiVersion: v1
-        kind: Pod
-        spec:
-          containers:
-            - name: tools
-              image: ubuntu:22.04
-              command:
-              - cat
-              tty: true
-              securityContext:
-                privileged: true
-              volumeMounts:
-              - mountPath: "/usr/local/bin"
-                name: bin-volume
-              - mountPath: "/home/jenkins/agent"
-                name: workspace-volume
-              - mountPath: "/var/lib/docker"
-                name: docker-volume
-          volumes:
-          - emptyDir: {}
-            name: bin-volume
-          - emptyDir:
-              medium: ""
-            name: workspace-volume
-          - emptyDir: {}
-            name: docker-volume
-        """
-                }
-        }  
+    agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+        }
+    }
     environment {
         APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
     }
@@ -99,10 +71,8 @@ pipeline {
         stage('Preparar Entorno') {
             steps {
                     sh '''
-                        apt-get update && apt-get install -y curl bash git docker.io
                         curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
                         ibmcloud plugin install container-registry -r 'IBM Cloud'
-                        dockerd > /var/log/dockerd.log 2>&1 &
                         sleep 10
                         docker version
                         ibmcloud --version
@@ -129,7 +99,6 @@ pipeline {
 
                     
                     if (params.MICROSERVICE == 'frontend') {
-                        // Extraer versión del archivo package.json para frontend
                         env.VERSION = sh(
                             script: "node -pe 'require(\"./package.json\").version'",
                             returnStdout: true
