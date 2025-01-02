@@ -2,6 +2,13 @@
   hosts: bd
   become: true
   tasks:
+    - name: Verificar conectividad con una IP externa (ping 8.8.8.8)
+      command: ping -c 4 8.8.8.8
+      register: ping_result
+      ignore_errors: yes
+    - name: Mostrar resultados del ping
+      debug:
+        msg: "{{ ping_result.stdout }}" 
     # Paso 2: Actualizar y actualizar el sistema
     - name: Update and Upgrade System
       apt:
