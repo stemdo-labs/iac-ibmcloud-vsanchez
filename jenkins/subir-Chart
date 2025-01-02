@@ -26,17 +26,6 @@ pipeline {
         }
 
 
-        stage('Empaquetar') {
-            steps {
-                script {
-                    def chartPath = "./charts/chart-${params.MICROSERVICE}"
-                    echo "Empaquetando ${chartPath}"
-                    sh "helm package ${chartPath}"
-                }
-                
-            }
-        }
-
         stage('Instalar IBM Cloud CLI') {
             steps {
                 sh '''
@@ -61,8 +50,11 @@ pipeline {
     steps {
         script {
             dir('charts') {
-                
+                def chartPath = "./charts/chart-${params.MICROSERVICE}"
+                    echo "Empaquetando ${chartPath}"
+                    sh "helm package ${chartPath}"
                 def serviceDir = "chart-${params.MICROSERVICE}"
+                
                 dir(serviceDir) {
                     echo "Entrando en la carpeta: ${serviceDir}"
                     
