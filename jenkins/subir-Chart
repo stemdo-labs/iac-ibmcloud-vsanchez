@@ -29,6 +29,7 @@ pipeline {
         stage('Empaquetar') {
             steps {
                 sh '''
+                ls -l
                 helm package "./charts/chart-${params.MICROSERVICE}"
                 '''
             }
