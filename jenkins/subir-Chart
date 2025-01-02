@@ -30,7 +30,7 @@ pipeline {
             steps {
                 sh '''
                 cd charts/
-                helm package ./chart-${params.MICROSERVICE}
+                helm package ./charts/chart-${params.MICROSERVICE}
                 '''
             }
         }
