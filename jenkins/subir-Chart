@@ -29,12 +29,9 @@ pipeline {
         stage('Empaquetar') {
             steps {
                 script {
-                    def chartPath = "./charts/cchart-${params.MICROSERVICE}"
+                    def chartPath = "./charts/chart-${params.MICROSERVICE}"
                     echo "Empaquetando ${chartPath}"
-                    sh '''
-                    ls -l charts
-                    helm package ${chartPath}
-                    '''
+                    sh "helm package ${chartPath}"
                 }
                 
             }
