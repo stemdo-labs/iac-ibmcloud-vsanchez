@@ -15,10 +15,10 @@ pipeline {
         stage('Setup SSH Keys') {
             steps {
                 sh '''
-                mkdir -p ~/.ssh
-                cp "${SSH_PRIVATE_KEY}" ~/.ssh/id_rsa              
-                chmod 600 ~/.ssh/id_rsa
-
+                    mkdir -p ~/.ssh
+                    cp "${SSHKEY}" ~/.ssh/id_rsa
+                    chmod 600 ~/.ssh/id_rsa
+                    ssh-keyscan -H 10.251.2.6 >> ~/.ssh/known_hosts
                 '''
             }
         }
