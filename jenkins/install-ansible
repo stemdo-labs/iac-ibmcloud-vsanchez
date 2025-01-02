@@ -18,7 +18,7 @@ pipeline {
                     mkdir -p ~/.ssh
                     cp "${SSHKEY}" ~/.ssh/id_rsa
                     chmod 600 ~/.ssh/id_rsa
-                    ssh-keyscan -H 10.251.2.6 >> ~/.ssh/known_hosts
+                    ssh-keyscan -H 10.251.10.34 >> ~/.ssh/known_hosts
                 '''
             }
         }
