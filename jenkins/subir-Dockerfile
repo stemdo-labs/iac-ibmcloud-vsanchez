@@ -53,19 +53,21 @@ pipeline {
             }
             steps {
                 script {
-                    sh "cd repo-principal "
-                    def confPath = "default.conf"
-                    def backendUrl = params.ENVIRONMENT == 'develop' 
-                        ? "http://backend-develop-svc:8080" 
-                        : "http://backend-production-svc:8080"
-                    def location = params.ENVIRONMENT == 'develop' 
-                        ? "/dev-vsanchez" 
-                        : "/prod-vsanchez"
-                    sh """
-                    sed -i "s|proxy_pass http://svc-backend:8080;|proxy_pass ${backendUrl};|g" ${confPath}
-                    sed -i "s|location /pepe-vsanchez |location ${location} |g" ${confPath}
-                    """
-                    sh "cat ${confPath}"
+                    dir('repo-principal') {
+                        sh "cd repo-principal "
+                        def confPath = "default.conf"
+                        def backendUrl = params.ENVIRONMENT == 'develop' 
+                            ? "http://backend-develop-svc:8080" 
+                            : "http://backend-production-svc:8080"
+                        def location = params.ENVIRONMENT == 'develop' 
+                            ? "/dev-vsanchez" 
+                            : "/prod-vsanchez"
+                        sh """
+                        sed -i "s|proxy_pass http://svc-backend:8080;|proxy_pass ${backendUrl};|g" ${confPath}
+                        sed -i "s|location /pepe-vsanchez |location ${location} |g" ${confPath}
+                        """
+                        sh "cat ${confPath}"
+                    }
                 }
             }
         }
