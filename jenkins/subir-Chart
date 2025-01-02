@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ')
     }
 
     parameters {
@@ -16,7 +16,6 @@ pipeline {
     }
 
     stages {
-
         stage('Instalar Helm') {
             steps {
                 sh '''
@@ -24,7 +23,6 @@ pipeline {
                 '''
             }
         }
-
 
         stage('Instalar IBM Cloud CLI') {
             steps {
@@ -47,22 +45,18 @@ pipeline {
         }
 
         stage('Subir Chart') {
-    steps {
-        script {
-            
-                def chartPath = "./charts/chart-${params.MICROSERVICE}"
+            steps {
+                script {
+                    def chartPath = "./charts/chart-${params.MICROSERVICE}"
                     echo "Empaquetando ${chartPath}"
                     sh "helm package ${chartPath}"
-                dir('charts') {    
-                def serviceDir = "chart-${params.MICROSERVICE}"
 
-                dir(serviceDir) {
+                    def serviceDir = "chart-${params.MICROSERVICE}"
                     echo "Entrando en la carpeta: ${serviceDir}"
-                    
+
                     // Buscar el archivo .tgz más reciente dentro de la carpeta
                     def chartFile = sh(script: "ls -t *.tgz | head -n 1", returnStdout: true).trim()
 
-                    
                     if (chartFile) {
                         echo "Subiendo chart ${chartFile}"
                         sh "helm push ${chartFile} oci://uk.icr.io/cr-vsanchez"
@@ -72,8 +66,5 @@ pipeline {
                 }
             }
         }
-    }
-}
-
     }
 }
