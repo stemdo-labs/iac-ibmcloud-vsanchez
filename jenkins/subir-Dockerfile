@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     dir('repo-principal') {
-                        git branch: "develop", url: "https://github.com/stemdo-labs/final-project-gestion-rrhh-${MICROSERVICE}-ValentinoSanchez00.git"
+                        git branch: "develop", url: "https://github.com/stemdo-labs/final-project-gestion-rrhh-${params.MICROSERVICE}-ValentinoSanchez00.git"
 
                     }
                 }
