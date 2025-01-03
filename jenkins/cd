@@ -45,6 +45,7 @@ pipeline {
                 ls -l
                 ibmcloud login --apikey ${APIKEY} -r eu-gb
                 ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr region-set global
                 ibmcloud cr login
                 ibmcloud cr namespace-add cr-vsanchez
                 """
@@ -53,7 +54,7 @@ pipeline {
         stage('Pull del chart'){
             steps {
                     dir('repo-principal') {
-                        sh " helm pull oci://uk.icr.io/cr-vsanchez --version ${params.VERSION}"
+                        sh " helm pull oci://icr.io/cr-vsanchez --version ${params.VERSION}"
                     }
                 
             }
