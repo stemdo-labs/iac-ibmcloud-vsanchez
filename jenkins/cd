@@ -78,7 +78,7 @@ pipeline {
                         --namespace vsanchez \
                         --version ${params.VERSION} \
                         -f values${params.ENVIRONMENT}.yaml \
-                        oci://icr.io/cr-vsanchez
+                        oci://icr.io/cr-vsanchez/chart-${params.MICROSERVICE}
                     """
                 }
             }
