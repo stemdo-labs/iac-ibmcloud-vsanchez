@@ -11,7 +11,7 @@ pipeline {
     parameters {
         string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
         string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Microservicio a desplegar (backend/frontend)')
-        string(name: 'VERSION', defaultValue: '1.0.9', description: 'Versión del microservicio')
+        string(name: 'VERSION', defaultValue: '1.1.0', description: 'Versión del microservicio')
     }
     stages {
         stage('Clonar repositorio principal') {
