@@ -64,6 +64,7 @@ pipeline {
                 script {
                     dir('repo-principal') {
                         "sh oc create project vsanchez"
+                        "sh oc adm policy add-scc-to-user anyuid -z default -n vsanchez"
                     }
                 }
             }
