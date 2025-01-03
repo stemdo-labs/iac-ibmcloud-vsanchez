@@ -1,22 +1,21 @@
 pipeline {
     agent any
     environment {
-        MICROSERVICE = 'frontend'
+        MICROSERVICE = ''
         ENVIRONMENT = ''
         BRANCH_NAME = ''
+        RUN_FRONTEND = false
+        RUN_BACKEND = false
     }
     stages {
         stage('Determine Branch from Webhook') {
             steps {
                 script {
-                    if (env.GIT_BRANCH) {
-                        BRANCH_NAME = env.GIT_BRANCH.replace('refs/heads/', '')
-                    } else {
-                        BRANCH_NAME = sh(
-                            script: "git rev-parse --abbrev-ref HEAD",
-                            returnStdout: true
-                        ).trim()
-                    }
+                    BRANCH_NAME = env.GIT_BRANCH?.replace('refs/heads/', '') ?: sh(
+                        script: "git rev-parse --abbrev-ref HEAD",
+                        returnStdout: true
+                    ).trim()
+                    
                     echo "Rama detectada: ${BRANCH_NAME}"
 
                     if (BRANCH_NAME == 'origin/main' || BRANCH_NAME.startsWith('pr')) {
@@ -39,59 +38,38 @@ pipeline {
                         changeSet.items.each { item ->
                             item.affectedFiles.each { file ->
                                 echo "Archivo: ${file.path}"
-            }
-        }
-    }
-}
-            }
-            
-        }
-        stage('Ejecutar Chart de frontend') {
-            when {
-                expression {
-                    currentBuild.changeSets.any { cs ->
-                        cs.items.any { item ->
-                            item.affectedFiles.any { file ->
-                                file.path.endsWith('charts/chart-frontend/Chart.yaml')
-                                file.path.endsWith('jenkins/subir-Chart') 
+                                if (file.path.endsWith('charts/chart-frontend/Chart.yaml')) {
+                                    RUN_FRONTEND = true
+                                }
+                                if (file.path.endsWith('charts/chart-backend/Chart.yaml')) {
+                                    RUN_BACKEND = true
+                                }
                             }
                         }
-                    } && ENVIRONMENT != ''
-                }
-            }
-            steps {
-                script {
-                    MICROSERVICE = 'frontend'
-                    echo "Ejecutando BuildChart con entorno ${ENVIRONMENT}..."
-                    build job: 'BuildChart',
-                    parameters: [
-                        string(name: 'MICROSERVICE', value: MICROSERVICE),
-                        string(name: 'ENVIRONMENT', value: ENVIRONMENT)
-                    ]
+                    }
+                    echo "RUN_FRONTEND: ${RUN_FRONTEND}, RUN_BACKEND: ${RUN_BACKEND}"
                 }
             }
         }
-        stage('Ejecutar Chart de backend') {
-            when {
-                expression {
-                    currentBuild.changeSets.any { cs ->
-                        cs.items.any { item ->
-                            item.affectedFiles.any { file ->
-                                file.path.endsWith('charts/chart-backend/Chart.yaml') 
-                            }
-                        }
-                    } && ENVIRONMENT != ''
-                }
-            }
+        stage('Ejecutar Charts') {
             steps {
                 script {
-                    MICROSERVICE = 'backend'
-                    echo "Ejecutando BuildChart con entorno ${ENVIRONMENT}..."
-                    build job: 'BuildChart',
-                    parameters: [
-                        string(name: 'MICROSERVICE', value: MICROSERVICE),
-                        string(name: 'ENVIRONMENT', value: ENVIRONMENT)
-                    ]
+                    if (RUN_FRONTEND) {
+                        echo "Ejecutando BuildChart para frontend con entorno ${ENVIRONMENT}..."
+                        build job: 'BuildChart',
+                        parameters: [
+                            string(name: 'MICROSERVICE', value: 'frontend'),
+                            string(name: 'ENVIRONMENT', value: ENVIRONMENT)
+                        ]
+                    }
+                    if (RUN_BACKEND) {
+                        echo "Ejecutando BuildChart para backend con entorno ${ENVIRONMENT}..."
+                        build job: 'BuildChart',
+                        parameters: [
+                            string(name: 'MICROSERVICE', value: 'backend'),
+                            string(name: 'ENVIRONMENT', value: ENVIRONMENT)
+                        ]
+                    }
                 }
             }
         }
