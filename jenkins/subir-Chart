@@ -32,6 +32,7 @@ pipeline {
                 sh '''
                 ibmcloud login --apikey ${APIKEY} -r eu-gb
                 ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr region-set global
                 ibmcloud cr login
                 '''
             }
@@ -52,7 +53,7 @@ pipeline {
 
                     if (chartFile) {
                         echo "Subiendo chart ${chartFile}"
-                        sh "helm push ${chartFile} oci://uk.icr.io/cr-vsanchez"
+                        sh "helm push ${chartFile} oci://icr.io/cr-vsanchez"
                     } else {
                         error "No se encontró ningún archivo .tgz en la carpeta ${serviceDir}"
                     }

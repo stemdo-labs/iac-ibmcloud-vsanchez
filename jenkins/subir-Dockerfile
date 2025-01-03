@@ -91,6 +91,7 @@ pipeline {
                 ls -l
                 ibmcloud login --apikey ${APIKEY} -r eu-gb
                 ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr region-set global
                 ibmcloud cr login
                 ibmcloud cr namespace-add cr-vsanchez
                 """
@@ -127,7 +128,7 @@ pipeline {
         stage('Construir Imagen') {
             steps {
                 dir('repo-principal') {
-                    sh "docker build -t uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION} ."
+                    sh "docker build -t icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION} ."
                 } 
             }
         }
@@ -135,7 +136,7 @@ pipeline {
             steps {
                 dir('repo-principal') {
                     sh """
-                    docker push uk.icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION}
+                    docker push icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION}
                     """
                 }
             }
