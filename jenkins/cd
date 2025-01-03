@@ -51,14 +51,7 @@ pipeline {
                 """
             }
         }
-        stage('Pull del chart'){
-            steps {
-                    dir('repo-principal') {
-                        sh " helm pull oci://icr.io/cr-vsanchez --version ${params.VERSION}"
-                    }
-                
-            }
-        }
+      
         stage('Crear namespace en el cluster'){
             steps {
                 dir('repo-principal') {
@@ -70,14 +63,18 @@ pipeline {
                 
             }
         }
-        stage('Desplegar chart'){
+        stage('Desplegar chart') {
             steps {
                 dir('repo-principal') {
-                    sh " helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} --namespace vsanchez -f values${params.ENVIROMENT}.yaml chart-${params.MICROSERVICE}-${params.ENVIRONMENT}"
+                    sh """
+                        helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} \
+                        --namespace vsanchez \
+                        --version ${params.VERSION} \
+                        -f values${params.ENVIROMENT}.yaml \
+                        oci://icr.io/cr-vsanchez
+                    """
                 }
-                
             }
         }
-
     }
 }
