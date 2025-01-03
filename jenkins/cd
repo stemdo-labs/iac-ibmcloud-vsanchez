@@ -77,7 +77,7 @@ pipeline {
                         helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} \
                         --namespace vsanchez \
                         --version ${params.VERSION} \
-                        -f values${params.ENVIROMENT}.yaml \
+                        -f values${params.ENVIRONMENT}.yaml \
                         oci://icr.io/cr-vsanchez
                     """
                 }
