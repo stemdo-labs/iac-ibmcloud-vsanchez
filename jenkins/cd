@@ -69,6 +69,28 @@ pipeline {
                 }
             }
         }
+        stage('Crear secreto') {
+            steps {
+                dir('repo-principal') {
+                    sh """
+                    # Verifica si el secreto ya existe en el namespace 'vsanchez'
+                    if ! oc get secret ibm-registry-secret -n vsanchez &>/dev/null; then
+                        # Crea el secreto usando las credenciales de IBM Cloud
+                        oc create secret docker-registry ibm-registry-secret \
+                            --docker-server=icr.io \
+                            --docker-username=iamapikey \
+                            --docker-password=${APIKEY} \
+                            --docker-email=vsanchez@stemdo.io \
+                            --namespace=vsanchez
+                        echo "Secreto creado exitosamente."
+                    else
+                        echo "El secreto 'ibm-registry-secret' ya existe. No se crea nuevamente."
+                    fi
+                    """
+                }
+            }
+        }
+
 
         stage('Desplegar chart') {
             steps {
