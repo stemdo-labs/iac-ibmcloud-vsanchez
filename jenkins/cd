@@ -74,7 +74,7 @@ pipeline {
             steps {
                 dir('repo-principal') {
                     sh """
-                        helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} \
+                        helm upgrade --install chart-${params.MICROSERVICE} \
                         --namespace vsanchez \
                         --version ${params.VERSION} \
                         -f values${params.ENVIRONMENT}.yaml \
