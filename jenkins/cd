@@ -56,8 +56,8 @@ pipeline {
             steps {
                 dir('repo-principal') {
                     sh """
-                    if ! oc get project vsanchez &>/dev/null; then
-                        oc create project vsanchez
+                    if ! oc get ns vsanchez &>/dev/null; then
+                        oc create ns vsanchez
                         oc adm policy add-scc-to-user anyuid -z default -n vsanchez
                     else
                         echo "El proyecto 'vsanchez' ya existe. No se crea nuevamente."
