@@ -52,30 +52,29 @@ pipeline {
         }
         stage('Pull del chart'){
             steps {
-                script {
                     dir('repo-principal') {
-                        "sh helm pull oci://uk.icr.io/cr-vsanchez --version ${params.VERSION}"
+                        sh " helm pull oci://uk.icr.io/cr-vsanchez --version ${params.VERSION}"
                     }
-                }
+                
             }
         }
         stage('Crear namespace en el cluster'){
             steps {
-                script {
-                    dir('repo-principal') {
-                        "sh oc create project vsanchez"
-                        "sh oc adm policy add-scc-to-user anyuid -z default -n vsanchez"
-                    }
+                dir('repo-principal') {
+                    sh """
+                    oc create project vsanchez
+                    oc adm policy add-scc-to-user anyuid -z default -n vsanchez
+                    """
                 }
+                
             }
         }
         stage('Desplegar chart'){
             steps {
-                script {
-                    dir('repo-principal') {
-                        "sh helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} --namespace vsanchez -f values${params.ENVIROMENT}.yaml chart-${params.MICROSERVICE}-${params.ENVIRONMENT}"
-                    }
+                dir('repo-principal') {
+                    sh " helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} --namespace vsanchez -f values${params.ENVIROMENT}.yaml chart-${params.MICROSERVICE}-${params.ENVIRONMENT}"
                 }
+                
             }
         }
 
