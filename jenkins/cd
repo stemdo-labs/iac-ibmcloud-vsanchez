@@ -48,6 +48,7 @@ pipeline {
                 ibmcloud cr region-set global
                 ibmcloud cr login
                 ibmcloud cr namespace-add cr-vsanchez
+                ibmcloud ks cluster config --cluster ez-ibm-openshift-vpc-w9ox --adminOK
                 """
             }
         }
