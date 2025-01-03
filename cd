@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+        }
+    }
+    environment {
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
+    }
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
+        string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Microservicio a desplegar (backend/frontend)')
+        string(name: 'VERSION', defaultValue: '1.0.0-SNAPSHOT', description: 'Versión del microservicio')
+    }
+    stages {
+        stage('Clonar repositorio principal') {
+            steps {
+                script {
+                    dir('repo-principal') {
+                        git branch: "develop", url: "https://github.com/stemdo-labs/final-project-gestion-rrhh-${MICROSERVICE}-ValentinoSanchez00.git"
+
+                    }
+                }
+            }
+        }
+        stage('Preparar Entorno') {
+            steps {
+                dir('repo-principal') {
+                    sh '''
+                        curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
+                        ibmcloud plugin install container-registry -r 'IBM Cloud'
+                        sleep 10
+                        docker version
+                        ibmcloud --version
+                        ibmcloud plugin list
+                    '''
+                
+                }
+            }
+        }
+        stage('Login IBM Cloud') {
+            steps {
+                sh """
+                ls -l
+                ibmcloud login --apikey ${APIKEY} -r eu-gb
+                ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr login
+                ibmcloud cr namespace-add cr-vsanchez
+                """
+            }
+        }
+        stage('Pull del chart'){
+            steps {
+                script {
+                    dir('repo-principal') {
+                        "sh helm pull oci://uk.icr.io/cr-vsanchez --version ${params.VERSION}"
+                    }
+                }
+            }
+        }
+        stage('Crear namespace en el cluster'){
+            steps {
+                script {
+                    dir('repo-principal') {
+                        "sh oc create project vsanchez"
+                    }
+                }
+            }
+        }
+        stage('Desplegar chart'){
+            steps {
+                script {
+                    dir('repo-principal') {
+                        "sh helm upgrade --install chart-${params.MICROSERVICE}-${params.ENVIRONMENT} --namespace vsanchez -f values${params.ENVIROMENT}.yaml chart-${params.MICROSERVICE}-${params.ENVIRONMENT}"
+                    }
+                }
+            }
+        }
+
+    }
+}

@@ -141,4 +141,19 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            steps {
+                script {
+                    echo "Ejecutando CD con entorno ${params.ENVIRONMENT}"
+                    build job: 'CD',
+                    parameters: [
+                        string(name: 'MICROSERVICE', value: params.MICROSERVICE),
+                        string(name: 'ENVIRONMENT', value: params.ENVIRONMENT)
+                        string(name: 'VERSION', value: env.VERSION)
+                    ]
+                }
+            }
+        }
+    }
 }
