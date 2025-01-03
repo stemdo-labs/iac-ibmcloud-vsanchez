@@ -49,7 +49,8 @@ pipeline {
                 ibmcloud cr login
                 ibmcloud cr namespace-add cr-vsanchez
                 ibmcloud plugin install container-service
-                ibmcloud ks cluster config --cluster ez-ibm-openshift-vpc-w9ox --adminOK
+                ibmcloud plugin update ks
+                ibmcloud ks cluster config --cluster ez-ibm-openshift-vpc-w9ox --admin
                 """
             }
         }
