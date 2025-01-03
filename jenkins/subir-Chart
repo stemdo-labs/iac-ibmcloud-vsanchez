@@ -16,13 +16,6 @@ pipeline {
     }
 
     stages {
-        stage('Instalar Helm') {
-            steps {
-                sh '''
-                curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-                '''
-            }
-        }
 
         stage('Instalar IBM Cloud CLI') {
             steps {

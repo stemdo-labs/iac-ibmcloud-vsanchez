@@ -41,18 +41,6 @@ pipeline {
             }
         }
 
-        stage('Install Ansible') {
-            steps {
-                sh '''
-                if ! command -v ansible &> /dev/null; then
-                    echo "Instalando Ansible..."
-                    apk add --no-cache ansible
-                    ansible --version
-                fi
-                '''
-            }
-        }
-
         stage('Ejecutar Playbook') {
             steps {
                 sh '''
