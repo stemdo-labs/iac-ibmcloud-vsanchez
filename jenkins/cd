@@ -73,7 +73,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                    if ! oc get secret ibmcloud-registry-secret -n acajas > /dev/null 2>&1; then
+                    if ! oc get secret ibmcloud-registry-secret -n vsanchez > /dev/null 2>&1; then
                         oc create secret docker-registry ibmcloud-registry-secret \
                         --docker-server=icr.io \
                         --docker-username=iamapikey \
