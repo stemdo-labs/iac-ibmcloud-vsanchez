@@ -50,6 +50,18 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
 
   
 }
+resource "ibm_is_security_group_rule" "allow_postgres" {
+  direction      = "inbound"
+  remote         = "0.0.0.0/0" 
+  ip_version     = "ipv4"
+  group =  ibm_is_security_group.security_group-vsanchez.id
+  tcp {
+  port_min       = 5432
+  port_max       = 5432
+  }
+
+  
+}
 resource "ibm_is_security_group_rule" "allow_ping" {
   direction      = "inbound"
   remote         = "0.0.0.0/0" 
