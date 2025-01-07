@@ -15,7 +15,7 @@ spec:
         app: backend
     spec:
       imagePullSecrets: 
-        - name: acr-secret
+        - name: ibm-registry-secret
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.backend.image }}
