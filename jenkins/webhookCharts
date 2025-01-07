@@ -54,7 +54,7 @@ pipeline {
         stage('Ejecutar Charts') {
             steps {
                 script {
-                    if (RUN_FRONTEND) {
+                    if (RUN_FRONTEND == true) {
                         echo "Ejecutando BuildChart para frontend con entorno ${ENVIRONMENT}..."
                         build job: 'BuildChart',
                         parameters: [
@@ -62,7 +62,7 @@ pipeline {
                             string(name: 'ENVIRONMENT', value: ENVIRONMENT)
                         ]
                     }
-                    if (RUN_BACKEND) {
+                    if (RUN_BACKEND == true) {
                         echo "Ejecutando BuildChart para backend con entorno ${ENVIRONMENT}..."
                         build job: 'BuildChart',
                         parameters: [
