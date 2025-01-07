@@ -1,73 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.backend.name }}
-  namespace: {{ .Values.namespace }}
+  name: {{.Release.Name}}
   labels:
-    app: {{ .Values.backend.name }}
+    app: backend
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.backend.name }}
+      app: backend
   template:
     metadata:
       labels:
-        app: {{ .Values.backend.name }}
+        app: backend
     spec:
-      imagePullSecrets:
-      - name: ibm-registry-secret
+      imagePullSecrets: 
+        - name: ibm-registry-secret
       containers:
-      - name: {{ .Values.backend.name }}
-        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+      - name: {{ .Release.Name }}
+        image: {{ .Values.backend.image }}
         ports:
-        - containerPort: {{ .Values.backend.port }}
+        - containerPort: {{ .Values.backend.containerPort }}
         env:
-          - name: SPRING_DB_HOST
-            valueFrom:
-              configMapKeyRef:
-                name: "{{ .Release.Name }}-configmap"
-                key: SPRING_DB_HOST
-          - name: SPRING_DB_PORT
-            valueFrom:
-              configMapKeyRef:
-                name: "{{ .Release.Name }}-configmap"
-                key: SPRING_DB_PORT
-          - name: SPRING_DB_NAME
-            valueFrom:
-              configMapKeyRef:
-                name: "{{ .Release.Name }}-configmap"
-                key: SPRING_DB_NAME
-          - name: SPRING_DB_USER
-            valueFrom:
-              configMapKeyRef:
-                name: "{{ .Release.Name }}-configmap"
-                key: SPRING_DB_USER
-          - name: SPRING_DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "{{ .Release.Name }}-secret"
-                key: SPRING_DB_PASSWORD
-        resources:
-          requests:
-            memory: {{ .Values.backend.resources.requests.memory }}
-            cpu: {{ .Values.backend.resources.requests.cpu }}
-          limits:
-            memory: {{ .Values.backend.resources.limits.memory }}
-            cpu: {{ .Values.backend.resources.limits.cpu }}
-        readinessProbe:
-          httpGet:
-            path: /api/empleados
-            port: {{ .Values.backend.port }}
-          initialDelaySeconds: {{ .Values.backend.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.backend.readinessProbe.timeoutSeconds }}
-          failureThreshold: {{ .Values.backend.readinessProbe.failureThreshold }}
-        livenessProbe:
-          httpGet:
-            path: /api/empleados
-            port: {{ .Values.backend.port }}
-          initialDelaySeconds: {{ .Values.backend.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.backend.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.backend.readinessProbe.timeoutSeconds }}
-          failureThreshold: {{ .Values.backend.readinessProbe.failureThreshold }}
+        {{- range $key, $value := .Values.backend.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
