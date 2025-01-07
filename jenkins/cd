@@ -1,10 +1,41 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-jenkins-agent'
-            defaultContainer 'dind'
-        }
+            label 'agent-vsanchez'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    some-label: custom-pod
+spec:
+  containers:
+  - name: custom-container
+    image: jooeel98/agente-jenkins:0.2.1
+    command:
+      - cat
+    tty: true
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - mountPath: "/usr/local/bin"
+        name: bin-volume
+      - mountPath: "/home/jenkins/agent"
+        name: workspace-volume
+      - mountPath: "/var/lib/docker"
+        name: docker-volume
+  volumes:
+  - emptyDir: {}
+    name: bin-volume
+  - emptyDir:
+      medium: ""
+    name: workspace-volume
+  - emptyDir: {}
+    name: docker-volume
+        """
     }
+}
+
     environment {
         APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
     }
