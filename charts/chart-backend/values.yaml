@@ -1,20 +1,30 @@
 backend:
-  replicas: 1
-  image: containerregistryvsanchez.azurecr.io/imagen-proyecto-backend:0.0.3-SNAPSHOT
-  containerPort: 8080
+  name: backend  # Nombre del backend
+  replicas: 1  # Número de réplicas
+  namespace: ""
+  image:
+    repository: ""
+    tag: ""
+  port: 8080  # Puerto de la aplicación
+  SPRING_DB_HOST: ""
+  SPRING_DB_PORT: ""
+  SPRING_DB_NAME: ""
+  SPRING_DB_USER: ""
+  SPRING_DB_PASSWORD: ""
   resources:
     requests:
+      memory: "128Mi"
+      cpu: "250m"
+    limits:
       memory: "256Mi"
       cpu: "500m"
-    limits:
-      memory: "512Mi"
-      cpu: "1000m"
-  env:
-    SPRING_DB_HOST: ""
-    SPRING_DB_PORT: ""
-    SPRING_DB_NAME: ""
-    SPRING_DB_USER: ""
-    SPRING_DB_PASSWORD: ""
+  readinessProbe:
+    initialDelaySeconds: 50
+    periodSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 40
+    periodSeconds: 10
   service:
-    port: 8080
+    port: 80
+    targetPort: 8080
     type: ClusterIP
