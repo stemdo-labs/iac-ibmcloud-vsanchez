@@ -20,7 +20,7 @@ spec:
         ports:
         - containerPort: {{ .Values.frontend.containerPort }}
         imagePullSecrets:
-          - name: acr-secret
+          - name: ibm-registry-secret
         resources:
           requests:
             memory: {{ .Values.frontend.resources.requests.memory }}
