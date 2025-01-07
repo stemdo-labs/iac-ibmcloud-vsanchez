@@ -14,8 +14,6 @@ spec:
       labels:
         app: backend
     spec:
-      imagePullSecrets: 
-        - name: ibm-registry-secret
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.backend.image }}
@@ -26,3 +24,5 @@ spec:
         - name: {{ $key }}
           value: "{{ $value }}"
         {{- end }}
+      imagePullSecrets: 
+        - name: ibm-registry-secret
