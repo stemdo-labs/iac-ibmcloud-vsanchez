@@ -33,9 +33,6 @@ spec:
 """
     }
         }
-        triggers {
-        githubPullRequest() 
-    }
     environment {
         MICROSERVICE = ''
         ENVIRONMENT = ''
