@@ -91,7 +91,6 @@ spec:
                             : "/prod-vsanchez"
                         sh """
                         sed -i "s|proxy_pass http://svc-backend:8080;|proxy_pass ${backendUrl};|g" ${confPath}
-                        // sed -i "s|location /pepe-vsanchez |location ${location} |g" ${confPath}
                         """
                         sh "cat ${confPath}"
                     }
