@@ -6,27 +6,7 @@ on:
       MICROSERVICE:
         required: true
         type: string
-      DB_HOST: 
-        required: true
-        type: string
-      DB_PORT: 
-        required: true
-        type: string
     secrets:
-      ARM_CLIENT_ID:
-        required: true
-      ARM_CLIENT_SECRET:
-        required: true
-      ARM_TENANT_ID:
-        required: true
-      ARM_SUBSCRIPTION_ID:  
-        required: true
-      DB_NAME:
-        required: true
-      DB_USER:
-        required: true
-      DB_PASSWORD:
-        required: true
       APIKEY:
         required: true
 
@@ -61,27 +41,6 @@ jobs:
           npx eslint --init
           npx eslint . --ext .js,.jsx,.ts,.tsx
 
-  testBackend:
-    if: ${{ inputs.MICROSERVICE == 'backend' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    env:
-      SPRING_DB_HOST: ${{ inputs.DB_HOST }}
-      SPRING_DB_PORT: ${{ inputs.DB_PORT }}
-      SPRING_DB_NAME: ${{ secrets.DB_NAME }}
-      SPRING_DB_USER: ${{ secrets.DB_USER }}
-      SPRING_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    steps:
-      - name: Checkout 
-        uses: actions/checkout@v3
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
- 
-      # - name: Run Maven tests
-      #   run: mvn test
 
   subirImagen:
     env:
@@ -91,8 +50,6 @@ jobs:
     environment: ${{ needs.set-environment.outputs.environment }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 
-        uses: actions/checkout@v3
       
       - name: Mostrar archivos
         run: ls
@@ -125,21 +82,6 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      # - name: Iniciar sesión en Azure
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: |
-      #       {
-      #         "clientId": "${{ secrets.ARM_CLIENT_ID }}",
-      #         "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
-      #         "tenantId": "${{ secrets.ARM_TENANT_ID }}",
-      #         "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
-      #       }
-
-      # - name: Login en Azure Container Registry
-      #   run: |
-      #     az acr login --name containerregistryvsanchez
-
       - name: Instalar IBM Cloud CLI
         run: |
           curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
@@ -171,25 +113,6 @@ jobs:
         run: |
           docker build -t imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} .
 
-      # - name: taggear la imagen
-      #   if: ${{ inputs.MICROSERVICE == 'frontend' }}
-      #   run: |
-      #     docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
-      
-      # - name: taggear la imagen
-      #   if: ${{ inputs.MICROSERVICE == 'backend' }}
-      #   run: |
-      #     docker tag imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }} containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
-      
-      # - name: Pushear imagen (Frontend)
-      #   if: ${{ inputs.MICROSERVICE == 'frontend' }}
-      #   run: |
-      #     docker push containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.frontend-version.outputs.version }}
-
-      # - name: Pushear imagen (Backend)
-      #   if: ${{ inputs.MICROSERVICE == 'backend' }}
-      #   run: |
-      #     docker push containerregistryvsanchez.azurecr.io/imagen-proyecto-${{ inputs.MICROSERVICE }}-${{ needs.set-environment.outputs.environment }}:${{ steps.backend-version.outputs.version }}
       - name: taggear la imagen
         if: ${{ inputs.MICROSERVICE == 'frontend' }}
         run: |

@@ -9,53 +9,32 @@ terraform {
 
 provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key # API Key de IBM Cloud
-  region           = "eu-gb"          # Región inicial
+  region           = "eu-es"          # Región inicial
   
 }
-
-# Crear VPC para "vpc-bd"
-resource "ibm_is_vpc" "vpc_bd" {
-  name           = "vpc-bd-vsanchez"
-  resource_group = var.rg-name
-}
-
-
-resource "ibm_is_public_gateway" "public_gateway" {
-  name   = "public-gateway-bd"
-  vpc    = ibm_is_vpc.vpc_bd.id
-  zone   = "eu-gb-1"
-  resource_group = var.rg-name
-}
-# Crear Subnet para "vpc-bd" en Londres
-resource "ibm_is_subnet" "subnet_bd" {
-  name            = "subnet-bd-vsanchez"
-  vpc             = ibm_is_vpc.vpc_bd.id
-  zone            = "eu-gb-1" # Zona de Londres
-  ipv4_cidr_block = "10.242.0.0/24" # Cambia por el rango CIDR que necesites
-  resource_group  = var.rg-name
-  public_gateway = ibm_is_public_gateway.public_gateway.id
-}
-
-
-
-resource "ibm_is_floating_ip" "public_ip" {
-  name            = "public-ip-vm-bd-vsanchez"
-  resource_group  = var.rg-name
-  target          = ibm_is_instance.instance_vsanchez.primary_network_interface.0.id
-
-}
-
-
  # acr
 resource "ibm_cr_namespace" "rg_namespace" {
   name              = "cr-vsanchez"
   resource_group_id = var.rg-name
 }
 
-resource "ibm_is_security_group" "ssh_security_group" {
-  name   = "ssh-security-group"
-  vpc    = ibm_is_vpc.vpc_bd.id 
+
+# Crear Subnet para "vpc-bd" en Londres
+resource "ibm_is_subnet" "subnet_bd" {
+  name            = "subnet-bd-vsanchez"
+  vpc             = var.vpc_id
+  zone            = "eu-es-1" 
+  ipv4_cidr_block = "10.251.10.0/24" 
+  resource_group  = var.rg-name
+  
+
+}
+
+resource "ibm_is_security_group" "security_group-vsanchez" {
+  name = "security-group-vsanchez"
   resource_group = var.rg-name
+  vpc = var.vpc_id
+  
 }
 
 # Crear una regla para habilitar el puerto 22 (SSH)
@@ -63,18 +42,44 @@ resource "ibm_is_security_group_rule" "allow_ssh" {
   direction      = "inbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
-  group =  ibm_is_security_group.ssh_security_group.id
+  group =  ibm_is_security_group.security_group-vsanchez.id
   tcp {
   port_min       = 22
   port_max       = 22
   }
+
   
 }
+resource "ibm_is_security_group_rule" "allow_postgres" {
+  direction      = "inbound"
+  remote         = "0.0.0.0/0" 
+  ip_version     = "ipv4"
+  group =  ibm_is_security_group.security_group-vsanchez.id
+  tcp {
+  port_min       = 5432
+  port_max       = 5432
+  }
+
+  
+}
+resource "ibm_is_security_group_rule" "allow_ping" {
+  direction      = "inbound"
+  remote         = "0.0.0.0/0" 
+  ip_version     = "ipv4"
+  group =  ibm_is_security_group.security_group-vsanchez.id
+  icmp {
+    type = 8
+    code = 0
+  }
+
+  
+}
+ 
 resource "ibm_is_security_group_rule" "allow_outbound" {
   direction      = "outbound"
   remote         = "0.0.0.0/0" 
   ip_version     = "ipv4"
-  group =  ibm_is_security_group.ssh_security_group.id
+  group =  ibm_is_security_group.security_group-vsanchez.id
 }
 
 resource "ibm_is_ssh_key" "ssh_key" {
@@ -88,18 +93,18 @@ resource "ibm_is_instance" "instance_vsanchez" {
   name                      = "vm-bd-vsanchez"
   image                     = var.id_imagen
   profile                   = "bx2-2x8"
-  vpc =  ibm_is_vpc.vpc_bd.id
-  zone =  "eu-gb-1"
+  vpc = var.vpc_id
+  zone =  "eu-es-1"
   resource_group = var.rg-name
   keys = [ ibm_is_ssh_key.ssh_key.id ]
 
   primary_network_interface {
     subnet = ibm_is_subnet.subnet_bd.id
     allow_ip_spoofing = true
-    security_groups  = [ibm_is_security_group.ssh_security_group.id]
+    security_groups  = [ ibm_is_security_group.security_group-vsanchez.id ]
     primary_ip {
     auto_delete       = false
-    address             = "10.242.0.8"
+    address             = "10.251.10.34"
     }
     
   }

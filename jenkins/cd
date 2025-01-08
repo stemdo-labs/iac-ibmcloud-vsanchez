@@ -1,0 +1,131 @@
+pipeline {
+     agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: tools
+      image: jooeel98/agente-jenkins:0.2.1
+      command:
+      - cat
+      tty: true
+      securityContext:
+        privileged: true
+      volumeMounts:
+      - mountPath: "/usr/local/bin"
+        name: bin-volume
+      - mountPath: "/home/jenkins/agent"
+        name: workspace-volume
+      - mountPath: "/var/lib/docker"
+        name: docker-volume
+  volumes:
+  - emptyDir: {}
+    name: bin-volume
+  - emptyDir:
+      medium: ""
+    name: workspace-volume
+  - emptyDir: {}
+    name: docker-volume
+"""
+    }
+        }  
+    environment {
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
+    }
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
+        string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Microservicio a desplegar (backend/frontend)')
+        string(name: 'VERSION', defaultValue: '2.0.0', description: 'Versión del chart')
+    }
+    stages {
+        stage('Clonar repositorio principal') {
+            steps {
+                script {
+                    dir('repo-principal') {
+                        git branch: "develop", url: "https://github.com/stemdo-labs/final-project-gestion-rrhh-${MICROSERVICE}-ValentinoSanchez00.git"
+
+                    }
+                }
+            }
+        }
+        stage('Preparar Entorno') {
+            steps {
+                dir('repo-principal') {
+                    sh '''
+                        curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
+                        ibmcloud plugin install container-registry -r 'IBM Cloud'
+                        sleep 10
+                        docker version
+                        ibmcloud --version
+                        ibmcloud plugin list
+                    '''
+                
+                }
+            }
+        }
+        stage('Login IBM Cloud') {
+            steps {
+                sh """
+                ls -l
+                ibmcloud login --apikey ${APIKEY} -r eu-gb
+                ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr region-set global
+                ibmcloud cr login
+                ibmcloud cr namespace-add cr-vsanchez
+                ibmcloud plugin install container-service
+                ibmcloud plugin update ks
+                ibmcloud ks cluster config --cluster ez-ibm-openshift-vpc-6zmu --admin
+                """
+            }
+        }
+      
+        stage('Crear namespace en el cluster'){
+            steps {
+                dir('repo-principal') {
+                    sh """
+                    if ! oc get ns vsanchez &>/dev/null; then
+                        oc create ns vsanchez
+                        oc adm policy add-scc-to-user anyuid -z default -n vsanchez
+                    else
+                        echo "El proyecto 'vsanchez' ya existe. No se crea nuevamente."
+                    fi
+                    """
+                }
+            }
+        }
+        stage('Crear secreto para las credenciales') {
+            steps {
+                script {
+                    sh """
+                    if ! oc get secret ibm-registry-secret -n vsanchez > /dev/null 2>&1; then
+                        oc create secret docker-registry ibm-registry-secret \
+                        --docker-server=icr.io \
+                        --docker-username=iamapikey \
+                        --docker-password=${APIKEY} \
+                        -n vsanchez
+                    fi
+                    """
+                }
+            }
+        }
+
+
+        stage('Desplegar chart') {
+            steps {
+                dir('repo-principal') {
+                    sh """
+                        helm upgrade --install ${params.MICROSERVICE}-${params.ENVIRONMENT} \
+                        --namespace vsanchez \
+                        --version ${params.VERSION} \
+                        -f values${params.ENVIRONMENT}.yaml \
+                        oci://icr.io/cr-vsanchez/chart-${params.MICROSERVICE}
+                    """
+                }
+            }
+        }
+    }
+}

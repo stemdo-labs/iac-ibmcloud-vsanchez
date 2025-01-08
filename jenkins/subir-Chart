@@ -1,0 +1,92 @@
+pipeline {
+     agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: tools
+      image: jooeel98/agente-jenkins:0.2.1
+      command:
+      - cat
+      tty: true
+      securityContext:
+        privileged: true
+      volumeMounts:
+      - mountPath: "/usr/local/bin"
+        name: bin-volume
+      - mountPath: "/home/jenkins/agent"
+        name: workspace-volume
+      - mountPath: "/var/lib/docker"
+        name: docker-volume
+  volumes:
+  - emptyDir: {}
+    name: bin-volume
+  - emptyDir:
+      medium: ""
+    name: workspace-volume
+  - emptyDir: {}
+    name: docker-volume
+"""
+    }
+        }
+
+    environment {
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ')
+    }
+
+    parameters {
+        string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Nombre del microservicio')
+        string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
+    }
+
+    stages {
+
+        stage('Instalar IBM Cloud CLI') {
+            steps {
+                sh '''
+                curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+                ibmcloud plugin install container-registry -r 'IBM Cloud'
+                ibmcloud plugin install container-service -r 'IBM Cloud'
+                '''
+            }
+        }
+
+        stage('Login en IBM Cloud') {
+            steps {
+                sh '''
+                ibmcloud login --apikey ${APIKEY} -r eu-gb
+                ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr region-set global
+                ibmcloud cr login
+                '''
+            }
+        }
+
+        stage('Subir Chart') {
+            steps {
+                script {
+                    def chartPath = "./charts/chart-${params.MICROSERVICE}"
+                    echo "Empaquetando ${chartPath}"
+                    sh "helm package ${chartPath}"
+
+                    def serviceDir = "chart-${params.MICROSERVICE}"
+                    echo "Entrando en la carpeta: ${serviceDir}"
+
+                    // Buscar el archivo .tgz más reciente dentro de la carpeta
+                    def chartFile = sh(script: "ls -t *.tgz | head -n 1", returnStdout: true).trim()
+
+                    if (chartFile) {
+                        echo "Subiendo chart ${chartFile}"
+                        sh "helm push ${chartFile} oci://icr.io/cr-vsanchez"
+                    } else {
+                        error "No se encontró ningún archivo .tgz en la carpeta ${serviceDir}"
+                    }
+                }
+            }
+        }
+    }
+}

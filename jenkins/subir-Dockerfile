@@ -1,0 +1,187 @@
+pipeline {
+     agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: tools
+      image: jooeel98/agente-jenkins:0.2.1
+      command:
+      - cat
+      tty: true
+      securityContext:
+        privileged: true
+      volumeMounts:
+      - mountPath: "/usr/local/bin"
+        name: bin-volume
+      - mountPath: "/home/jenkins/agent"
+        name: workspace-volume
+      - mountPath: "/var/lib/docker"
+        name: docker-volume
+  volumes:
+  - emptyDir: {}
+    name: bin-volume
+  - emptyDir:
+      medium: ""
+    name: workspace-volume
+  - emptyDir: {}
+    name: docker-volume
+"""
+    }
+        }
+    environment {
+        APIKEY = credentials('IBM_CLOUD_API_KEY_VSANCHEZ') 
+    }
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
+        string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Microservicio a desplegar (backend/frontend)')
+    }
+    stages {
+        stage('Clonar repositorio principal') {
+            steps {
+                script {
+                    dir('repo-principal') {
+                        git branch: "develop", url: "https://github.com/stemdo-labs/final-project-gestion-rrhh-${params.MICROSERVICE}-ValentinoSanchez00.git"
+
+                    }
+                }
+            }
+        }
+        stage('Mostrar Configuración') {
+            steps {
+                
+                echo "Configuración elegida:"
+                echo "Microservicio: ${params.MICROSERVICE}"
+                echo "Ambiente: ${params.ENVIRONMENT}"
+            }
+        }
+        stage('Test Frontend') {
+            when {
+                allOf {
+                    expression { params.MICROSERVICE == 'frontend' }
+                    expression { params.ENVIRONMENT == 'production' }
+                }
+            }
+            steps {
+                echo "Configurando y ejecutando linte"
+                sh """
+                npm install eslint --save-dev
+                npx eslint --init
+                npx eslint . --ext .js,.jsx,.ts,.tsx
+                """
+            }
+        }
+        stage('Configurar default.conf') {
+            when {
+                expression { params.MICROSERVICE == 'frontend' }
+            }
+            steps {
+                script {
+                    dir('repo-principal') {
+                        def confPath = "default.conf"
+                        def backendUrl = params.ENVIRONMENT == 'develop' 
+                            ? "http://backend-develop-svc:8080" 
+                            : "http://backend-production-svc:8080"
+                        def location = params.ENVIRONMENT == 'develop' 
+                            ? "/dev-vsanchez" 
+                            : "/prod-vsanchez"
+                        sh """
+                        sed -i "s|proxy_pass http://svc-backend:8080;|proxy_pass ${backendUrl};|g" ${confPath}
+                        """
+                        sh "cat ${confPath}"
+                    }
+                }
+            }
+        }
+        stage('Preparar Entorno') {
+            steps {
+                dir('repo-principal') {
+                    sh '''
+                        curl -fsSL https://clis.cloud.ibm.com/install/linux | bash
+                        ibmcloud plugin install container-registry -r 'IBM Cloud'
+                        sleep 10
+                        docker version
+                        ibmcloud --version
+                        ibmcloud plugin list
+                    '''
+                
+                }
+            }
+        }
+        stage('Login IBM Cloud') {
+            steps {
+                sh """
+                ls -l
+                ibmcloud login --apikey ${APIKEY} -r eu-gb
+                ibmcloud target -g Stemdo_Sandbox
+                ibmcloud cr region-set global
+                ibmcloud cr login
+                ibmcloud cr namespace-add cr-vsanchez
+                """
+            }
+        }
+
+        stage('Extraer Versión') {
+            steps {
+                script {
+                    dir('repo-principal') {
+                        sh "ls -l"
+                        if (params.MICROSERVICE == 'frontend') {
+                            def json = readJSON file: 'package.json'
+                            env.VERSION = json.version
+                        } else if (params.MICROSERVICE == 'backend'){
+                            echo " extrayendo versión del archivo pom.xml"
+                            env.VERSION = sh(
+                                script: """
+                                awk '/<artifactId>rh<\\/artifactId>/,/<\\/project>/{
+                                    if (\$0 ~ /<version>/) {
+                                        print \$0
+                                    }
+                                }' pom.xml | sed -n '1p' | sed -E 's/.*<version>(.*)<\\/version>.*/\\1/'
+                                """,
+                                returnStdout: true
+                            ).trim()
+                        }
+
+                        echo "Versión detectada: ${env.VERSION}"
+                    }
+                }
+            }
+        }
+        stage('Construir Imagen') {
+            steps {
+                dir('repo-principal') {
+                    sh "docker build -t icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION} ."
+                } 
+            }
+        }
+        stage('Pushear Imagen') {
+            steps {
+                dir('repo-principal') {
+                    sh """
+                    docker push icr.io/cr-vsanchez/imagen-proyecto-${params.MICROSERVICE}-${params.ENVIRONMENT}:${env.VERSION}
+                    """
+                }
+            }
+        }
+    }
+    post {
+        success {
+            script {
+                echo "Ejecutando CD con entorno ${params.ENVIRONMENT}"
+                build job: 'CD',
+                parameters: [
+                    string(name: 'MICROSERVICE', value: params.MICROSERVICE),
+                    string(name: 'ENVIRONMENT', value: params.ENVIRONMENT),
+                    string(name: 'VERSION', value: '4.0.1')
+                ]
+            }
+        }
+    }
+
+
+}

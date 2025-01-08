@@ -1,0 +1,118 @@
+pipeline {
+     agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: tools
+      image: jooeel98/agente-jenkins:0.2.1
+      command:
+      - cat
+      tty: true
+      securityContext:
+        privileged: true
+      volumeMounts:
+      - mountPath: "/usr/local/bin"
+        name: bin-volume
+      - mountPath: "/home/jenkins/agent"
+        name: workspace-volume
+      - mountPath: "/var/lib/docker"
+        name: docker-volume
+  volumes:
+  - emptyDir: {}
+    name: bin-volume
+  - emptyDir:
+      medium: ""
+    name: workspace-volume
+  - emptyDir: {}
+    name: docker-volume
+"""
+    }
+        }
+    environment {
+        MICROSERVICE = ''
+        ENVIRONMENT = ''
+        BRANCH_NAME = ''
+        RUN_FRONTEND = false
+        RUN_BACKEND = false
+    }
+    stages {
+        stage('Determine Branch from Webhook') {
+            steps {
+                script {
+                    BRANCH_NAME = env.GIT_BRANCH?.replace('refs/heads/', '') ?: sh(
+                        script: "git rev-parse --abbrev-ref HEAD",
+                        returnStdout: true
+                    ).trim()
+                    
+                    echo "Rama detectada: ${BRANCH_NAME}"
+
+                    if (BRANCH_NAME == 'origin/main' || BRANCH_NAME.startsWith('pr')) {
+                        ENVIRONMENT = 'production'
+                    } else if (BRANCH_NAME == 'origin/develop') {
+                        ENVIRONMENT = 'develop'
+                    } else {
+                        error "Push desde rama no soportada: ${BRANCH_NAME}. No se realizará ninguna acción."
+                    }
+
+                    echo "Entorno configurado: ${ENVIRONMENT}"
+                }
+            }
+        }
+        stage('Detectar archivos cambiados') {
+            steps {
+                script {
+                    echo "Archivos cambiados detectados:"
+                    currentBuild.changeSets.each { changeSet ->
+                        changeSet.items.each { item ->
+                            item.affectedFiles.each { file ->
+                                echo "Archivo: ${file.path}"
+                                if (file.path.endsWith('charts/chart-frontend/Chart.yaml')) {
+                                    RUN_FRONTEND = true
+                                }
+                                if (file.path.endsWith('charts/chart-backend/Chart.yaml')) {
+                                    RUN_BACKEND = true
+                                }
+                            }
+                        }
+                    }
+                    echo "RUN_FRONTEND: ${RUN_FRONTEND}, RUN_BACKEND: ${RUN_BACKEND}"
+                }
+            }
+        }
+        stage('Ejecutar Charts') {
+            steps {
+                script {
+                    if (RUN_FRONTEND == true) {
+                        echo "Ejecutando BuildChart para frontend con entorno ${ENVIRONMENT}..."
+                        build job: 'BuildChart',
+                        parameters: [
+                            string(name: 'MICROSERVICE', value: 'frontend'),
+                            string(name: 'ENVIRONMENT', value: ENVIRONMENT)
+                        ]
+                    }
+                    if (RUN_BACKEND == true) {
+                        echo "Ejecutando BuildChart para backend con entorno ${ENVIRONMENT}..."
+                        build job: 'BuildChart',
+                        parameters: [
+                            string(name: 'MICROSERVICE', value: 'backend'),
+                            string(name: 'ENVIRONMENT', value: ENVIRONMENT)
+                        ]
+                    }
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "Pipeline ejecutada exitosamente en la rama ${BRANCH_NAME} con entorno ${ENVIRONMENT}."
+        }
+        failure {
+            echo "Error en la ejecución. Revisa la configuración de la rama: ${BRANCH_NAME}."
+        }
+    }
+}

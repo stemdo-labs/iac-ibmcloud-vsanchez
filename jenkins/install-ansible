@@ -1,0 +1,50 @@
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+        }
+    }
+
+    environment {
+        SSHKEY = credentials('SSHKEY')
+        
+    }
+
+    stages {
+        stage('Setup SSH Keys') {
+            steps {
+                sh '''
+                    mkdir -p ~/.ssh
+                    cp "${SSHKEY}" ~/.ssh/id_rsa
+                    chmod 600 ~/.ssh/id_rsa
+                    ssh-keyscan -H 10.251.10.34 >> ~/.ssh/known_hosts
+                '''
+            }
+        }
+
+        stage('Prepare Environment') {
+            steps {
+                sh '''
+                # Instalar dependencias manualmente si apt no está disponible
+                if ! command -v apt-get &> /dev/null; then
+                    echo "apt-get no disponible, preparando entorno manualmente..."
+                    # Instalar curl y gnupg usando otras herramientas
+                    apk add --no-cache curl gnupg lsb-release
+                fi
+                '''
+            }
+        }
+
+
+        stage('Run Ansible Playbook') {
+            steps {
+                sh '''
+                cd ansible
+                ansible-playbook -i inventory.ini install_ansible_and_dependencies.yaml
+                '''
+            }
+        }
+    }
+
+}

@@ -1,0 +1,55 @@
+pipeline {
+   agent {
+        kubernetes {
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
+        }
+    }
+
+    environment {
+        KEY_SECRET = credentials('KEY_SECRET') 
+        SSHKEY = credentials('SSHKEY')
+        USER_PASSWORD = credentials('USER_PASSWORD') 
+    }
+
+    stages {
+
+        stage('Agregar Contraseña del Secret') {
+            steps {
+                sh '''
+                echo $KEY_SECRET > ansible/secreto.txt
+                '''
+            }
+        }
+
+        stage('Mostrar Archivos') {
+            steps {
+                sh '''
+                ls ansible
+                '''
+            }
+        }
+
+        stage('Agregar Llaves SSH') {
+            steps {
+                sh '''
+                mkdir -p ~/.ssh
+                cp "${SSHKEY}" ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+                ssh-keyscan -H 10.251.10.34 >> ~/.ssh/known_hosts
+                '''
+            }
+        }
+
+        stage('Ejecutar Playbook') {
+            steps {
+                sh '''
+                ansible-playbook ansible/main.yaml -i ansible/inventory.ini \
+                --vault-password-file ansible/secreto.txt \
+                --become \
+                --extra-vars "ansible_become_password=$USER_PASSWORD"
+                '''
+            }
+        }
+    }
+}

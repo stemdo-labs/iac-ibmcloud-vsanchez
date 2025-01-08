@@ -10,11 +10,11 @@ backend:
       memory: "512Mi"
       cpu: "1000m"
   env:
-    SPRING_DB_HOST: "10.0.0.5"
-    SPRING_DB_PORT: "5432"
-    SPRING_DB_NAME: "orquestas"
-    SPRING_DB_USER: "vsanchez"
-    SPRING_DB_PASSWORD: "mypassword"
+    SPRING_DB_HOST: ""
+    SPRING_DB_PORT: ""
+    SPRING_DB_NAME: ""
+    SPRING_DB_USER: ""
+    SPRING_DB_PASSWORD: ""
   service:
     port: 8080
     type: ClusterIP
