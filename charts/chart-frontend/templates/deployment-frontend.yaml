@@ -34,3 +34,14 @@ spec:
             port: {{ .Values.frontend.containerPort }}
           initialDelaySeconds: 5
           periodSeconds: 10
+        securityContext:
+          runAsUser: 1000660001
+          runAsGroup: 997
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+              - ALL
