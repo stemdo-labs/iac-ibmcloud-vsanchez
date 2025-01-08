@@ -1,92 +1,8 @@
 pipeline {
     agent {
         kubernetes {
-            label 'agent-vsanchez'
-            yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    kubernetes.jenkins.io/last-refresh: "1736262961283"
-  labels:
-    jenkins/jenkins-agent: "true"
-    jenkins/label-digest: "custom-500b4f18aee87616849e4f4c2435020898e34aa0"
-    jenkins/label: "custom-jenkins-agent"
-    kubernetes.jenkins.io/controller: "http___jenkins_default_svc_cluster_local_8080x"
-  name: "custom-agent-abc123"
-  namespace: "custom-namespace"
-spec:
-  containers:
-  - command:
-    - "dockerd-entrypoint.sh"
-    env:
-    - name: "JENKINS_URL"
-      value: "http://jenkins.custom-namespace.svc.cluster.local:8080/"
-    image: "custom-docker-image:1.0"
-    imagePullPolicy: "IfNotPresent"
-    name: "custom-dind"
-    resources:
-      limits:
-        memory: "2Gi"
-        cpu: "1"
-      requests:
-        memory: "1Gi"
-        cpu: "500m"
-    securityContext:
-      privileged: true
-    tty: false
-    volumeMounts:
-    - mountPath: "/custom/path/jenkins/agent"
-      name: "custom-workspace-volume"
-      readOnly: false
-    workingDir: "/custom/path/jenkins/agent"
-  - args:
-    - "custom-secret"
-    - "custom-agent-abc123"
-    env:
-    - name: "JENKINS_SECRET"
-      value: "custom-secret"
-    - name: "JENKINS_TUNNEL"
-      value: "jenkins-agent.custom-namespace.svc.cluster.local:50000"
-    - name: "JENKINS_AGENT_NAME"
-      value: "custom-agent-abc123"
-    - name: "REMOTING_OPTS"
-      value: "-noReconnectAfter 1d"
-    - name: "JENKINS_NAME"
-      value: "custom-agent-abc123"
-    - name: "JENKINS_AGENT_WORKDIR"
-      value: "/custom/path/jenkins/agent"
-    - name: "JENKINS_URL"
-      value: "http://jenkins.custom-namespace.svc.cluster.local:8080/"
-    image: "custom-jnlp-agent:latest"
-    imagePullPolicy: "IfNotPresent"
-    name: "custom-jnlp"
-    resources:
-      limits:
-        memory: "512Mi"
-        cpu: "512m"
-      requests:
-        memory: "512Mi"
-        cpu: "512m"
-    tty: false
-    volumeMounts:
-    - mountPath: "/custom/path/jenkins/agent"
-      name: "custom-workspace-volume"
-      readOnly: false
-    workingDir: "/custom/path/jenkins/agent"
-  hostNetwork: false
-  nodeSelector:
-    kubernetes.io/os: "linux"
-  restartPolicy: "Never"
-  securityContext:
-    runAsGroup: 0
-    runAsUser: 0
-  serviceAccountName: "custom-service-account"
-  volumes:
-  - emptyDir:
-      medium: ""
-    name: "custom-workspace-volume"
-"""
+            label 'jenkins-jenkins-agent'
+            defaultContainer 'dind'
         }
     }
     environment {
@@ -95,7 +11,7 @@ spec:
     parameters {
         string(name: 'ENVIRONMENT', defaultValue: 'develop', description: 'Ambiente de despliegue (develop/production)')
         string(name: 'MICROSERVICE', defaultValue: 'backend', description: 'Microservicio a desplegar (backend/frontend)')
-        string(name: 'VERSION', defaultValue: '3.0.0', description: 'Versión del microservicio')
+        string(name: 'VERSION', defaultValue: '2.0.0', description: 'Versión del microservicio')
     }
     stages {
         stage('Clonar repositorio principal') {
