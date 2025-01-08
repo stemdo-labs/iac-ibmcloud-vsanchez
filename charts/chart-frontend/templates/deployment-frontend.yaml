@@ -14,13 +14,13 @@ spec:
       labels:
         app: frontend
     spec:
+      imagePullSecrets: 
+        - name: ibm-registry-secret
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.frontend.image }}
         ports:
         - containerPort: {{ .Values.frontend.containerPort }}
-        imagePullSecrets:
-          - name: ibm-registry-secret
         resources:
           requests:
             memory: {{ .Values.frontend.resources.requests.memory }}
