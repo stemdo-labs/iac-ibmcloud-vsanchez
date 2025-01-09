@@ -63,6 +63,8 @@ spec:
             steps {
                 echo "Configurando y ejecutando linte"
                 sh """
+                curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                apt-get install -y nodejs
                 npm install eslint --save-dev
                 npx eslint --init
                 npx eslint . --ext .js,.jsx,.ts,.tsx
