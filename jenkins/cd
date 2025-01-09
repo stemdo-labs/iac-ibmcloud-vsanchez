@@ -37,6 +37,15 @@ spec:
                 }
             }
         }
+        stage('Docker') {
+            steps {
+                sh """
+                docker --version
+                dockerd &
+                sleep 10
+                """
+            }
+        }
         stage('Preparar Entorno') {
             steps {
                 dir('repo-principal') {
