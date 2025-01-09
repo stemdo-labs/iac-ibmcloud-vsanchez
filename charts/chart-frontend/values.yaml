@@ -2,7 +2,7 @@
 frontend:
   replicas: 2
   image: containerregistryvsanchez.azurecr.io/imagen-proyecto-frontend
-  containerPort: 80
+  containerPort: 8081
   resources:
     requests:
       memory: "128Mi"
@@ -11,7 +11,7 @@ frontend:
       memory: "256Mi"
       cpu: "500m"
   service:
-    port: 80
+    port: 8081
     type: LoadBalancer
 
 
