@@ -65,7 +65,7 @@ spec:
                 sh """
                 apk add --no-cache nodejs npm
                 npm install eslint --save-dev
-                npx eslint --init
+                npx eslint .
                 npx eslint . --ext .js,.jsx,.ts,.tsx
                 """
             }
