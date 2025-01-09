@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{.Release.Name}}
+  name: {{ .Release.Name }}
   labels:
     app: frontend
 spec:
@@ -49,7 +49,7 @@ spec:
           - name: nginx-cache
             mountPath: /var/cache/nginx
           - name: nginx-run
-    mountPath: /var/run
+            mountPath: /var/run
       volumes:
       - name: nginx-cache
         emptyDir: {}
