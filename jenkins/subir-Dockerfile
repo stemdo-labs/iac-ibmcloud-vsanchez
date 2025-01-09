@@ -61,14 +61,24 @@ spec:
                 }
             }
             steps {
-                echo "Configurando y ejecutando linte"
-                sh """
-                apk add --no-cache nodejs npm
-                npm install eslint --save-dev
-                npx eslint .
-                npx eslint . --ext .js,.jsx,.ts,.tsx
-                """
-            }
+            echo "Configurando y ejecutando lint"
+            sh """
+            apk add --no-cache nodejs npm
+            npm install eslint --save-dev
+            echo "export default {
+                files: ['**/*.{js,jsx,ts,tsx}'],
+                languageOptions: {
+                    ecmaVersion: 2021,
+                    sourceType: 'module',
+                },
+                rules: {
+                    'no-unused-vars': 'warn',
+                    'no-console': 'off',
+                },
+            };" > eslint.config.js
+            npx eslint .
+            """
+    }
         }
         stage('Configurar default.conf') {
             when {
