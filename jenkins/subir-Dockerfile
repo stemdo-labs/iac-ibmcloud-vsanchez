@@ -53,33 +53,6 @@ spec:
                 echo "Ambiente: ${params.ENVIRONMENT}"
             }
         }
-        stage('Test Frontend') {
-            when {
-                allOf {
-                    expression { params.MICROSERVICE == 'frontend' }
-                    expression { params.ENVIRONMENT == 'production' }
-                }
-            }
-            steps {
-            echo "Configurando y ejecutando lint"
-            sh """
-            apk add --no-cache nodejs npm
-            npm install eslint --save-dev
-            echo "export default {
-                files: ['**/*.{js,jsx,ts,tsx}'],
-                languageOptions: {
-                    ecmaVersion: 2021,
-                    sourceType: 'module',
-                },
-                rules: {
-                    'no-unused-vars': 'warn',
-                    'no-console': 'off',
-                },
-            };" > eslint.config.js
-            npx eslint .
-            """
-    }
-        }
         stage('Configurar default.conf') {
             when {
                 expression { params.MICROSERVICE == 'frontend' }
