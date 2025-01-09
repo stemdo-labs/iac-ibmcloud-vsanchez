@@ -64,7 +64,6 @@ spec:
                 echo "Configurando y ejecutando linte"
                 sh """
                 apk add --no-cache nodejs npm
-                apt-get install -y nodejs
                 npm install eslint --save-dev
                 npx eslint --init
                 npx eslint . --ext .js,.jsx,.ts,.tsx
