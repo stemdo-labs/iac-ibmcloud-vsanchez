@@ -1,38 +1,23 @@
 pipeline {
      agent {
         kubernetes {
-            label 'jenkins-jenkins-agent'
-            defaultContainer 'dind'
+            label 'vsanchez'
+            defaultContainer 'vsanchez'
             yaml """
 apiVersion: v1
 kind: Pod
 spec:
   containers:
-    - name: tools
-      image: jooeel98/agente-jenkins:0.2.1
-      command:
-      - cat
-      tty: true
-      securityContext:
-        privileged: true
-      volumeMounts:
-      - mountPath: "/usr/local/bin"
-        name: bin-volume
-      - mountPath: "/home/jenkins/agent"
-        name: workspace-volume
-      - mountPath: "/var/lib/docker"
-        name: docker-volume
-  volumes:
-  - emptyDir: {}
-    name: bin-volume
-  - emptyDir:
-      medium: ""
-    name: workspace-volume
-  - emptyDir: {}
-    name: docker-volume
+  - name: vsanchez
+    image: jooeel98/agente-jenkins:0.3.1
+    command:
+    - cat
+    tty: true
+    securityContext:
+      privileged: true
 """
-    }
         }
+    }
     environment {
         MICROSERVICE = ''
         ENVIRONMENT = ''
