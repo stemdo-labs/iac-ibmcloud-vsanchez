@@ -155,7 +155,7 @@ spec:
                 parameters: [
                     string(name: 'MICROSERVICE', value: params.MICROSERVICE),
                     string(name: 'ENVIRONMENT', value: params.ENVIRONMENT),
-                    string(name: 'VERSION', value: '1.0.0')
+                    string(name: 'VERSION', value: '1.0.1')
                 ]
             }
         }
