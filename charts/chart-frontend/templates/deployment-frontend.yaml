@@ -35,8 +35,8 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
         securityContext:
-          runAsUser: 2147483645
-          runAsGroup: 2147483645
+          runAsUser: 1000689995
+          runAsGroup: 1000689995
           runAsNonRoot: true
           seccompProfile:
             type: RuntimeDefault
