@@ -83,6 +83,7 @@ spec:
                     sh """
                     if ! oc get ns vsanchez &>/dev/null; then
                         oc create ns vsanchez
+                        oc adm policy add-scc-to-user anyuid
                     else
                         echo "El proyecto 'vsanchez' ya existe. No se crea nuevamente."
                     fi
