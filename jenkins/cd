@@ -72,7 +72,7 @@ spec:
                 ibmcloud cr namespace-add cr-vsanchez
                 ibmcloud plugin install container-service
                 ibmcloud plugin update ks
-                ibmcloud ks cluster config --cluster ez-ibm-openshift-vpc-tl1o --admin
+                ibmcloud ks cluster config --cluster ez-ibm-openshift-vpc-3zyj --admin
                 """
             }
         }
